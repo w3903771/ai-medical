@@ -2,21 +2,72 @@
 
 本文件为前后端对接用的 RESTful 接口文档。已覆盖当前原型中的 Dashboard、指标管理、指标记录、指标详情知识、分析、住院管理、LLM、设置、文件服务与用药模块。每个接口均标注英文名、公共前置地址、接口路径、请求方法、请求体/查询参数、响应体与说明。
 
-## 公共约定（Common Conventions）
+## 接口概述
 
-- Prefix（公共前置地址）：`http://<host>/api/v1`
- - Health（健康检查）：`GET /api/v1/health` 返回 `{ "status": "ok" }`
-- Auth（鉴权）：`Authorization: Bearer <jwtToken>`（登录与刷新令牌除外）
-- Content-Type：JSON 使用 `application/json`；上传使用 `multipart/form-data`
-- Pagination（分页）：`page`, `pageSize`；筛选：`keyword`, `startDate`, `endDate`, `category`, `sortBy`, `order`
-- Standard Response（统一响应）：
-  - 成功：`{ "code": 0, "message": "OK", "data": <payload>, "traceId": "<id>" }`
-  - 失败：`{ "code": <nonzero>, "message": "<error>", "data": null, "traceId": "<id>" }`
-- Error Codes（错误码）：`0` 成功；`400` 参数错误；`401` 未鉴权；`403` 禁止；`404` 不存在；`409` 冲突；`422` 校验失败；`500` 系统错误
-- Idempotency（幂等性）：写操作支持 `Idempotency-Key`（可选）
-- Upload Safety（上传安全）：仅允许 PDF/JPG/PNG 白名单
+- 接口风格：RESTful API
+- 数据格式：JSON
+- 字符编码：UTF-8
+- 公共前置地址：`${base_url}`（示例：`http://<host>/api`）
+- 健康检查端点：`GET ${base_url}/v1/health`（返回健康状态）
+- 版本控制：`/v1/`（统一前缀 `${base_url}/v1`；当前实现示例为 `http://<host>/api/v1`）
+
+### 通用响应格式
+```
+{
+  "code": 200,
+  "message": "success",
+  "data": {},
+  "timestamp": "2025-10-10T08:00:00Z",
+  "traceId": "<id>"
+}
+```
+- 失败响应遵循 HTTP 语义（4xx/5xx），`message` 提供可读错误文案；`data` 可为空对象或省略。
+
+### 标准化状态码
+- 1xx：100 Continue；101 Switching Protocols
+- 2xx：200 OK；201 Created；202 Accepted；204 No Content；206 Partial Content
+- 3xx：301 Moved Permanently；302 Found；304 Not Modified；307 Temporary Redirect
+- 4xx：400 Bad Request；401 Unauthorized；403 Forbidden；404 Not Found；405 Method Not Allowed；408 Request Timeout；409 Conflict；413 Payload Too Large；415 Unsupported Media Type
+- 5xx：500 Internal Server Error；501 Not Implemented；502 Bad Gateway；503 Service Unavailable；504 Gateway Timeout
+
+### 认证与头信息
+- 认证方式：Bearer Token（除登录/注册/刷新外均需）
+- 请求头：`Authorization: Bearer ${token}`；`Content-Type: application/json`；`Accept: application/json`
+- 响应头：`X-Request-ID`；`X-RateLimit-Limit`；`X-RateLimit-Remaining`
+- 上传安全：仅允许 PDF/JPG/PNG 白名单；采用 `multipart/form-data` 或签名直传
+
+### 分页与筛选约定
+- 通用参数：`page`, `pageSize`, `keyword`, `startDate`, `endDate`, `category`, `sortBy`, `order`
+- 返回结构统一：`{ items: [], total: number }`
 
 ---
+
+## 接口规范模板（模块描述统一格式）
+
+按照功能模块顺序，每个接口以如下模板描述：
+
+### 2.1 接口基本信息
+- 接口名称：`${interface_name}`
+- 功能描述：`${description}`
+- 接口路径前缀：`${prefix}`（通常为 `${base_url}/v1`）
+- 接口路径：`${endpoint}`
+- 请求方法：`${method}`
+
+### 2.2 请求参数
+| 参数名 | 类型 | 必填 | 描述 | 示例值 |
+|--------|------|------|------|--------|
+| `${param}` | `${type}` | `${required}` | `${desc}` | `${example}` |
+
+### 2.3 响应数据
+- 成功响应：`200`
+- 错误响应：`4xx/5xx`
+- 数据结构：`${response_structure}`（遵循通用响应格式，数据在 `data` 中）
+
+### 2.4 使用示例
+请求示例：
+```http
+${request_example}
+```
 
 ## 鉴权（Auth）
 
@@ -57,7 +108,7 @@
 - Endpoint：`/account/profile`
 - Method：`PUT`
 - Request（Body）：`{ "email": "string", "username": "string(optional)" }`
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：仅允许更新非敏感字段；`username` 若更新需唯一校验
 
 ### 修改密码（Change Password）
@@ -65,7 +116,7 @@
 - Endpoint：`/account/password`
 - Method：`PUT`
 - Request（Body）：`{ "oldPassword": "string", "newPassword": "string" }`
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：后端校验旧密码；新密码复杂度校验
 
 ### 登出（Logout）
@@ -73,7 +124,7 @@
 - Endpoint：`/auth/logout`
 - Method：`POST`
 - Request：`{}` 或仅头部携带当前令牌
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：前端清除本地令牌；后端可加入黑名单（可选）
 
 ---
@@ -137,14 +188,14 @@
 - Endpoint：`/indicators/{id}`
 - Method：`PUT`
 - Request（Body）：同“新增指标定义”
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：全量更新
 
 ### 删除指标定义（Delete Indicator）
 - Prefix：`/api/v1`
 - Endpoint：`/indicators/{id}`
 - Method：`DELETE`
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：支持软删除（可选）
 
 ---
@@ -180,14 +231,14 @@
 - Endpoint：`/indicators/{id}/records/{recordId}`
 - Method：`PATCH`
 - Request（Body）：同上任意字段
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：部分字段更新
 
 ### 删除记录（Delete Indicator Record）
 - Prefix：`/api/v1`
 - Endpoint：`/indicators/{id}/records/{recordId}`
 - Method：`DELETE`
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：谨慎操作，支持软删除（可选）
 
 ### 批量导入记录（Import Indicator Records）
@@ -293,14 +344,14 @@
 - Endpoint：`/admissions/{id}`
 - Method：`PUT`
 - Request（Body）：同“新增住院记录”
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：全量更新
 
 ### 删除住院记录（Delete Admission）
 - Prefix：`/api/v1`
 - Endpoint：`/admissions/{id}`
 - Method：`DELETE`
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：谨慎操作
 
 ### 住院记录详情（Get Admission）
@@ -409,7 +460,7 @@
 - Endpoint：`/account/password`
 - Method：`PUT`
 - Request（Body）：`{ "oldPassword":"", "newPassword":"", "confirmPassword":"" }`
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：后端校验旧密码并加密存储新密码
 
 ### 模型服务设置（Model Settings）
@@ -594,13 +645,13 @@ axios.get('/api/v1/admissions/adm-1001/files/f-1/indicator-records',{ params:{ p
 - Endpoint：`/user-indicators`
 - Method：`POST` / `PUT`
 - Request（Body）：`{ "indicatorId": 101, "alias": "收缩压", "thresholdMin": 90, "thresholdMax": 140, "favorite": true }`
-- Response（Body）：`{ "id": 11 }` 或 `{ "code": 0 }`
+- Response（Body）：`{ "id": 11 }` 或 `{ "code": 200 }`
 - Notes：`POST` 新建；`PUT` 更新已存在的同一 `indicatorId` 的配置。
 
 ### 取消关注（Delete User Indicator）
 - Endpoint：`/user-indicators/{id}`
 - Method：`DELETE`
-- Response（Body）：`{ "code": 0 }`
+- Response（Body）：`{ "code": 200 }`
 - Notes：删除后 `/indicators` 列表不再显示 `favorite=true`。
 ```js
 axios.post('/api/v1/admissions/adm-1001/files/f-1/ocr',{ language:'zh', engine:'paddleocr' })
@@ -641,7 +692,7 @@ axios.post('/api/v1/llm/analyzeMetrics',{
 - 新增/获取/更新/删除用药字典（Create/Get/Update/Delete Medication）
   - Endpoint：`/medications`（`POST`），`/medications/{id}`（`GET` / `PUT` / `DELETE`）
   - Request（Body，POST/PUT）：`{ "name":"", "genericName":"", "spec":"", "unit":"" }`
-  - Response：`{ "id": 1 }` 或 `{ "code": 0 }`
+  - Response：`{ "id": 1 }` 或 `{ "code": 200 }`
   - Notes：避免重复；支持软删除（可选）
 
 - 用药记录列表（List Medication Records）
@@ -654,7 +705,7 @@ axios.post('/api/v1/llm/analyzeMetrics',{
 - 新增/更新/删除用药记录（Create/Update/Delete Medication Record）
   - Endpoint：`/medications/{id}/records`（`POST`），`/medications/{id}/records/{recordId}`（`PATCH` / `DELETE`）
   - Request（Body，POST）：`{ "startDate":"YYYY-MM-DD", "endDate":null, "dose":"500mg", "frequency":"BID", "route":"PO", "purpose":"", "notes":"", "isCurrent":true }`
-  - Response：`{ "recordId": 11 }` 或 `{ "code":0 }`
+  - Response：`{ "recordId": 11 }` 或 `{ "code": 200 }`
   - Notes：`PATCH` 支持部分字段更新
 
 ---
@@ -679,7 +730,7 @@ axios.post('/api/v1/llm/analyzeMetrics',{
   - Endpoint：`/kb/docs/{id}`
   - Method：`GET` / `PUT` / `DELETE`
   - Request（Body，PUT）：`{ "title":"...", "meta":{...} }`
-  - Response：`{ "code": 0 }`
+  - Response：`{ "code": 200 }`
   - Notes：删除为软删（可选）
 
 - 构建向量（Build Embeddings）
@@ -714,7 +765,7 @@ axios.post('/api/v1/llm/analyzeMetrics',{
 - 新建/获取/删除会话（Create/Get/Delete Chat Session）
   - Endpoint：`/chat/sessions`（`POST`），`/chat/sessions/{sessionId}`（`GET` / `DELETE`）
   - Request（Body，POST）：`{ "title":"指标分析" }`
-  - Response：`{ "sessionId":"cs-1" }` 或 `{ "code":0 }`
+  - Response：`{ "sessionId":"cs-1" }` 或 `{ "code": 200 }`
   - Notes：删除会话可级联删除消息（可选）
 
 - 消息列表（List Chat Messages）
@@ -726,7 +777,7 @@ axios.post('/api/v1/llm/analyzeMetrics',{
 - 发送/更新/删除消息（Send/Update/Delete Message）
   - Endpoint：`/chat/sessions/{sessionId}/messages`（`POST`），`/chat/sessions/{sessionId}/messages/{messageId}`（`PATCH` / `DELETE`）
   - Request（Body，POST）：`{ "role":"user", "content":"...", "toolCalls":[] }`
-  - Response：`{ "messageId":"m-1" }` 或 `{ "code":0 }`
+  - Response：`{ "messageId":"m-1" }` 或 `{ "code": 200 }`
 
 ---
 
@@ -761,7 +812,7 @@ axios.post('/api/v1/llm/analyzeMetrics',{
   - Endpoint：`/admissions/folders/{id}`
   - Method：`GET` / `PUT` / `DELETE`
   - Request（Body，PUT）：`{ "year": 2024, "month": 11 }`
-  - Response：`{ "code": 0 }`
+  - Response：`{ "code": 200 }`
   - Notes：与树结构联动
 
 ---
@@ -843,12 +894,107 @@ axios.post('/api/v1/llm/analyzeMetrics',{
   - Response：`{ "items":[ { "taskId":"ocr-123", "admissionId":"adm-1001", "fileId":"f-1", "status":"running", "createdAt":"..." } ], "total": 8 }`
   - Notes：统一查看与管理 OCR 异步任务
 
+---
+
+## 补充与修订（v0.2 提案）
+
+为更好地与前端（Pinia 状态管理）对接与保障契约一致性，补充以下规范与端点；本节不改变已有端点含义，主要增加统一约定与聚合/增量/批量能力。
+
+### 统一响应契约
+- 成功码统一为 `code: 200`；失败使用既定错误码（400/401/403/404/409/422/500）。
+- 统一结构：`{ code, message, data, timestamp, traceId }`；`message`为用户可读文案；`timestamp`为 ISO 8601；`traceId`用于日志关联。
+- 响应头建议：`X-Request-ID`、`X-Trace-ID`（CORS 暴露）。
+- 条件请求（可选）：返回 `ETag`/`Last-Modified`，前端可使用 `If-None-Match` 实现缓存命中。
+- 前端拦截器约定：以 `code===200` 作为成功判断，返回 `data`；401 触发清理本地令牌并跳转登录。
+
+### 鉴权与会话补充
+- 获取当前用户信息（初始化）
+  - Endpoint：`GET /api/v1/auth/me`
+  - Response：`{ "code":200, "message":"success", "data": { "id": 1, "username": "...", "email": "...", "role": "user", "lastLogin": "YYYY-MM-DDTHH:mm:ssZ" }, "timestamp":"<iso>", "traceId":"..." }`
+- 退出登录（清理服务端状态，可选）
+  - Endpoint：`POST /api/v1/auth/logout`
+  - Response：`{ "code":200, "message":"success", "data": {}, "timestamp":"<iso>", "traceId":"..." }`
+- 刷新令牌：沿用 `POST /auth/refresh`，明确返回结构与过期策略（TTL、缓冲窗口）。
+
+### 初始化与聚合端点（Pinia 友好）
+- 应用引导（Bootstrap）
+  - Endpoint：`GET /api/v1/bootstrap`
+  - Response：聚合返回 `{ profile, settings, dashboard, currentMedications, favorites }` 等初始化所需数据。
+- 首页卡片聚合（Dashboard Cards）
+  - Endpoint：`GET /api/v1/dashboard/cards`
+  - Response：`{ "code":200, "message":"success", "data": { "keyIndicators": [ ... ], "abnormalCount": 3, "currentMedications": [ ... ], "recentChanges": [ ... ] }, "timestamp":"<iso>", "traceId":"..." }`
+
+### 列表与增量查询（统一）
+- 返回结构统一：`{ items: [], total: number }` 作为 `data` 的主体。
+- 通用查询参数：
+  - `page`, `pageSize`, `keyword`, `sortBy`, `order`
+  - `fields`（返回字段投影，逗号分隔）
+  - `updatedAfter`（ISO 时间，增量查询）或 `sinceVersion`（整型版本号，增量查询）
+
+### 批量与幂等端点（新增）
+- 指标记录批量导入：`POST /api/v1/indicators/records/bulk-import`
+  - Body：`{ "items": [ { "indicatorId": 101, "measuredAt": "YYYY-MM-DD", "value": 118, "unit": "mmHg", "refLow": 90, "refHigh": 140, "source": "manual" } ] }`
+  - Headers（可选）：`Idempotency-Key: <uuid>`
+- 指标记录批量删除：`DELETE /api/v1/indicators/records/bulk`
+  - Body：`{ "recordIds": [11,12,13] }`
+- 用药记录批量更新：`PATCH /api/v1/medications/records/bulk`
+  - Body：`{ "items": [ { "recordId": 11, "endDate": "YYYY-MM-DD", "isCurrent": false } ] }`
+
+### 指标透视与趋势（新增/细化）
+- 透视表（Pivot）
+  - Endpoint：`GET /api/v1/indicators/pivot`
+  - Query：`ids=101,102&granularity=day|week|month&start=YYYY-MM-DD&end=YYYY-MM-DD`
+  - Response：`{ "code":200, "message":"success", "data": { "timePoints": ["2025-10-01", "2025-10-02"], "series": [ { "indicatorId": 101, "name": "收缩压", "unit": "mmHg", "values": [118, 120], "refLow": 90, "refHigh": 140 } ] }, "timestamp":"<iso>", "traceId":"..." }`
+- 趋势分析（细化统一）
+  - Endpoint：`GET /api/v1/analysis/indicators/trend`
+  - Query：`id=101&start=YYYY-MM-DD&end=YYYY-MM-DD&granularity=day|week|month`
+  - Response：`{ "code":200, "message":"success", "data": { "series": [ { "t": "2025-10-01", "v": 118 } ], "stats": { "mean": 119, "std": 3.2, "trendSlope": -0.5, "abnormalCount": 1 } }, "timestamp":"<iso>", "traceId":"..." }`
+
+### 异步任务轮询与推送（统一约定）
+- 统一任务状态查询：`GET /api/v1/tasks/{taskId}/status`
+  - Response：`{ "code":200, "message":"success", "data": { "taskId": "ocr-123", "status": "queued|running|done|failed", "progress": 0.6, "message": "..." }, "timestamp":"<iso>", "traceId":"..." }`
+- 任务事件流（SSE，可选）：`GET /api/v1/tasks/{taskId}/stream`
+  - Server-Sent Events：`event: status\ndata: { ... }\n\n`
+  - 前端可轮询作为保底策略。
+
+### 文件直传与签名链接（补充）
+- 获取签名链接（细化）
+  - Endpoint：`POST /api/v1/files/signed-url`
+  - Body：`{ "key": "uploads/2025/report.pdf", "method": "PUT", "contentType": "application/pdf" }`
+  - Response：`{ "code":200, "message":"success", "data": { "url": "http://...", "expiresIn": 600 }, "timestamp":"<iso>", "traceId":"..." }`
+- 直传约束：仅允许 PDF/JPG/PNG；限制大小；返回 `url`/`ossKey` 与过期时间。
+
+### 字段命名与时间格式（一致性）
+- 外部接口字段统一使用小驼峰（camelCase）；后端内部模型蛇形（snake_case），在序列化层映射。
+- 时间统一 ISO 8601（UTC），字段名约定：`createdAt`、`updatedAt`、`uploadedAt`、`measuredAt`。
+- 指标记录字段统一：`value`、`unit`、`refLow`、`refHigh`、`refText`、`source`、`note`、`admissionFileId`。
+
+### 示例：Bootstrap 响应结构
+```json
+{
+  "code": 200,
+  "message": "OK",
+  "data": {
+    "profile": { "id": 1, "username": "tg", "role": "user", "lastLogin": "2025-10-10T08:00:00Z" },
+    "settings": { "theme": "light", "locale": "zh-CN" },
+    "dashboard": { "keyIndicators": [ { "id": 101, "name": "收缩压", "unit": "mmHg", "current": 118 } ], "abnormalCount": 3, "recentChanges": [] },
+    "currentMedications": [ { "name": "Metformin", "dose": "500mg", "frequency": "BID", "route": "PO", "isCurrent": true } ],
+    "favorites": [101, 102]
+  },
+  "traceId": "..."
+}
+```
+
+### 前端拦截器兼容说明
+- 建议拦截器按本文件的统一约定解析：成功 `code===200` 时返回 `data`，否则提示 `message`；401 触发清理本地令牌并跳转登录。
+
+
 ### 更新指标知识信息（Update Indicator Detail）
 - Endpoint：`/indicators/{id}/detail`
 - Method：`PUT`
 - Request（Body）：
   `{ "category":"基础指标", "introductionText":"...", "measurementMethod":"...", "clinicalSignificance":"...", "referenceRange":"...", "unit":"kg", "highMeaning":"...", "lowMeaning":"...", "highAdvice":"...", "lowAdvice":"...", "normalAdvice":"...", "generalAdvice":"..." }`
-- Response：`{ "code": 0 }`
+- Response：`{ "code": 200 }`
 - Notes：仅管理员/开发者允许；支持部分字段更新可改为 `PATCH`
 
 ---
