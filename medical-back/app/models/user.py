@@ -9,8 +9,9 @@ from .base import IDMixin, TimestampMixin, SoftDeleteMixin
 
 
 class User(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
-    username: str = Field(index=True, unique=True)  # 用户名（唯一）
-    password_hash: str  # 密码哈希
-    email: Optional[str] = Field(default=None, index=True)  # 邮箱
-    role: Optional[str] = Field(default="user", index=True)  # 角色（默认 user）
-    last_login: Optional[datetime] = None  # 最近登录时间
+    username: str = Field(index=True, unique=True, nullable=False)  # 用户名（唯一）
+    name: str = Field(index=False, nullable=False)  # 姓名
+    password_hash: str = Field(nullable=False)  # 密码哈希
+    email: Optional[str] = Field(default=None, index=True, unique=True)  # 邮箱
+    role: str = Field(default="user", index=True, nullable=False)  # 角色（默认 user）
+    last_login: Optional[datetime] = Field(default=None)  # 最近登录时间

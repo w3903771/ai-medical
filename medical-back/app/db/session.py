@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from app.core.settings import get_settings
 from app.models.indicator import Indicator, IndicatorRecord
+from app.models.indicator_detail import IndicatorDetail
 from app.models.admission import AdmissionFolder, Admission, AdmissionFile
 from app.models.medication import Medication, MedicationRecord
 from app.models.user import User

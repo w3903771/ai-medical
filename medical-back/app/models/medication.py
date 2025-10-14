@@ -3,12 +3,18 @@ from __future__ import annotations
 from typing import Optional
 from datetime import date
 from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import UniqueConstraint, Index
+
 from .base import IDMixin, TimestampMixin, SoftDeleteMixin
 
 # 用药相关模型：药品与用药记录
 
 
 class Medication(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
+    __table_args__ = (
+        UniqueConstraint("name", "spec"),
+    )
+    
     name: str  # 药品名称
     generic_name: Optional[str] = None  # 通用名
     spec: Optional[str] = None  # 规格（剂型/浓度等）
@@ -17,6 +23,11 @@ class Medication(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True)
 
 
 class MedicationRecord(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
+    __table_args__ = (
+        Index("idx_medicationrecord_medication", "medication_id"),
+        Index("idx_medicationrecord_current", "is_current"),
+        Index("idx_medicationrecord_user_current", "user_id", "is_current"),
+    )
     medication_id: int = Field(foreign_key="medication.id", index=True)  # 药品ID
     user_id: int = Field(foreign_key="user.id", index=True)  # 用户ID
     start_date: Optional[date] = None  # 开始用药日期

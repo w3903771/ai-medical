@@ -31,6 +31,22 @@
 - ChatSession 1—N ChatMessage
 - ExportTask 独立；WebSearchQuery 独立；SystemLog 独立
 
+关系示意（简图）：
+
+```
+User ——< UserIndicator >—— Indicator ——< IndicatorRecord ——> AdmissionFile ——> Admission ——> AdmissionFolder
+   \                                                                
+    \——< MedicationRecord ——> Medication                           
+     \——< ChatSession ——< ChatMessage                               
+      \——< AuditLog                                                  
+
+KnowledgeDoc ——< KnowledgeChunk
+AdmissionFile ——< OcrTask
+User ——< ExportTask
+User ——< WebSearchQuery
+SystemLog（系统级独立）
+```
+
 ---
 
 ## 用户与鉴权
@@ -38,6 +54,7 @@
 ### User
 - id: integer, PK, auto
 - username: varchar(64), unique, not null
+- name: varchar(128), not null
 - password_hash: varchar(255), not null
 - email: varchar(128), unique, null
 - role: varchar(32), not null, default 'user'  // user|admin|developer
@@ -54,12 +71,11 @@
 
 ### Indicator（指标定义，系统级 + 用户自定义）
 - id: integer, PK, auto
-- code: varchar(64), unique, null  // 系统内置指标使用全局 code；用户自定义可为空
 - owner_user_id: integer, FK → User.id, null  // 自定义指标归属者；内置指标为 NULL
 - name_cn: varchar(128), not null
 - name_en: varchar(128), null
 - unit: varchar(32), not null
-- category: varchar(64), null
+- category_id: integer, FK → Category.id, null
 - reference_min: numeric(12,4), null
 - reference_max: numeric(12,4), null
 - is_builtin: boolean, not null, default false
@@ -68,13 +84,26 @@
 
 索引：
 - idx_indicator_owner (owner_user_id)
-- idx_indicator_category (category)
+- idx_indicator_category_id (category_id)
 唯一约束（建议）：
-- unique(code)  // 仅针对内置指标
-- unique(owner_user_id, name_cn, unit)  // 用户自定义在用户域内唯一
+- unique(owner_user_id, name_cn)  // 用户自定义在用户域内唯一
 
 接口映射：
 - `/api/v1/indicators` 列表：支持查询内置与自定义；“我关注的”需联表 `UserIndicator`。
+
+### Category（指标分类，系统级）
+- id: integer, PK, auto
+- name: varchar(128), unique, not null
+- description: text, null
+- created_at: datetime, not null
+- deleted_at: datetime, null
+
+索引：
+- unique(name)
+
+管理与使用：
+- 分类仅由系统管理员维护；不提供用户自建/编辑接口。
+- 用户侧筛选通过 `UserIndicator.favorite` 实现“我关注的指标”。
 
 ### IndicatorRecord（指标记录）
 - id: integer, PK, auto
@@ -93,9 +122,9 @@
 - deleted_at: datetime, null
 
 索引与约束：
-- idx_record_indicator_date (indicator_id, measured_at)
-- idx_record_user_date (user_id, measured_at)
-- idx_record_file (admission_file_id)
+- idx_indicatorrecord_indicator_measured (indicator_id, measured_at)
+- idx_indicatorrecord_user_measured (user_id, measured_at)
+- idx_indicatorrecord_file (admission_file_id)
 - 可选唯一约束：同一用户同一指标在同一天仅一条固定来源记录 → unique(user_id, indicator_id, measured_at, source)
 一致性：
 - 写入校验 `IndicatorRecord.user_id == AdmissionFile.user_id`（若 `admission_file_id` 非空）。
@@ -116,8 +145,8 @@
 
 索引与约束：
 - unique(user_id, indicator_id)
-- idx_ui_user (user_id)
-- idx_ui_user_fav (user_id, favorite)
+- idx_userindicator_user (user_id)
+- idx_userindicator_user_favorite (user_id, favorite)
 
 接口映射：
 - `/api/v1/user-indicators`：关注、取消关注与个性化配置；列表按照 `user_id` 过滤。
@@ -181,7 +210,7 @@
 - hospital: varchar(128), not null
 - department: varchar(64), null
 - diagnosis: varchar(255), null
-- admission_date: date, not null
+- admission_date: date, null
 - discharge_date: date, null
 - tags_json: text, null  // JSON 字符串
 - notes: text, null
@@ -191,14 +220,16 @@
 索引：
 - idx_admission_folder (folder_id)
 - idx_admission_user (user_id)
-- idx_admission_dates (admission_date, discharge_date)
+- idx_admission_hospital (hospital)
+- idx_admission_user_dates (user_id, admission_date, discharge_date)
 
 ### AdmissionFile（文件项）
 - id: integer, PK, auto
 - admission_id: integer, FK → Admission.id, not null
 - user_id: integer, FK → User.id, not null
 - filename: varchar(255), not null
-- oss_key: varchar(255), null  // 或本地路径
+- oss_key: varchar(255), null  // 云存储 Key（如使用 OSS/S3）
+- url: varchar(255), null  // 文件访问 URL
 - pages: integer, null
 - ocr_done: boolean, not null, default false
 - extracted_text: text, null
@@ -207,9 +238,9 @@
 - deleted_at: datetime, null
 
 索引：
-- idx_file_admission (admission_id)
-- idx_file_user (user_id, uploaded_at)
- -（与指标记录联动）建议为 `indicator_record.admission_file_id` 创建索引 `idx_record_file`，支持按文件反查记录。
+- idx_admissionfile_admission (admission_id)
+- idx_admissionfile_user_uploaded (user_id, uploaded_at)
+ -（与指标记录联动）建议为 `indicator_record.admission_file_id` 创建索引 `idx_indicatorrecord_file`，支持按文件反查记录。
 
 ---
 
@@ -243,9 +274,9 @@
 - deleted_at: datetime, null
 
 索引：
-- idx_mr_medication (medication_id)
-- idx_mr_current (is_current)
-- idx_mr_user (user_id, is_current)
+- idx_medicationrecord_medication (medication_id)
+- idx_medicationrecord_current (is_current)
+- idx_medicationrecord_user_current (user_id, is_current)
 
 ---
 
@@ -262,7 +293,7 @@
 - deleted_at: datetime, null
 
 索引：
-- idx_kb_source (source_type)
+- idx_knowledgedoc_source (source_type)
 
 ### KnowledgeChunk（分块）
 - id: integer, PK, auto
@@ -274,24 +305,24 @@
 
 索引：
 - unique(doc_id, chunk_index)
-- idx_chunk_doc (doc_id)
+- idx_knowledgechunk_doc (doc_id)
 
 ---
 
 ## 聊天与消息
 
 ### ChatSession
-- id: varchar(64), PK  // 如 cs-1；也可 integer PK
+- id: integer, PK, auto
 - user_id: integer, FK → User.id, not null
 - title: varchar(255), not null
 - created_at: datetime, not null
 - deleted_at: datetime, null
 索引：
-- idx_session_user (user_id, created_at)
+- idx_chatsession_user_created (user_id, created_at)
 
 ### ChatMessage
-- id: varchar(64), PK  // 如 m-1；也可 integer PK
-- session_id: varchar(64), FK → ChatSession.id, not null
+- id: integer, PK, auto
+- session_id: integer, FK → ChatSession.id, not null
 - role: varchar(16), not null  // user|assistant|tool
 - content: text, not null
 - tool_calls_json: text, null
@@ -299,7 +330,7 @@
 - deleted_at: datetime, null
 
 索引：
-- idx_msg_session (session_id, created_at)
+- idx_chatmessage_session_created (session_id, created_at)
 
 ---
 
@@ -310,7 +341,7 @@
 - admission_id: integer, FK → Admission.id, not null
 - file_id: integer, FK → AdmissionFile.id, not null
 - user_id: integer, FK → User.id, not null
-- status: varchar(16), not null  // pending|running|done|failed
+- status: varchar(16), not null  // queued|running|done|failed
 - language: varchar(8), null  // zh|en
 - engine: varchar(32), null  // paddleocr 等
 - created_at: datetime, not null
@@ -318,8 +349,8 @@
 - deleted_at: datetime, null
 
 索引：
-- idx_ocr_file (file_id, status)
-- idx_ocr_user (user_id, status)
+- idx_ocrtask_file_status (file_id, status)
+- idx_ocrtask_user_status (user_id, status)
 
 ### ExportTask
 - id: varchar(64), PK  // exp-1
@@ -334,8 +365,8 @@
 - deleted_at: datetime, null
 
 索引：
-- idx_export_status (status)
-- idx_export_user (user_id, status)
+- idx_exporttask_status (status)
+- idx_exporttask_user_status (user_id, status)
 
 ---
 
@@ -358,8 +389,8 @@
 - created_at: datetime, not null
 
 索引：
-- idx_audit_entity (entity, entity_id)
-- idx_audit_user (user_id, created_at)
+- idx_auditlog_entity_entityid (entity, entity_id)
+- idx_auditlog_user_created (user_id, created_at)
 
 ---
 
@@ -374,7 +405,8 @@
 - created_at: datetime, not null
 
 索引：
-- idx_web_user (user_id, created_at)
+- idx_websearchquery_user_created (user_id, created_at)
+
 ### ModelProviderStatus
 - id: integer, PK, auto
 - provider_key: varchar(32), not null
@@ -400,98 +432,6 @@
 
 ---
 
-## 字段与接口对照表（关键映射）
-- `/indicators` 列表：indicator(name_cn), unit, referenceRange(reference_min/reference_max 聚合), measureDate(最新 IndicatorRecord.measured_at)；“我关注的”由 `UserIndicator` 关联
-- `/indicators/{id}/records`：date(measured_at), value, unit, status(计算), source, note, admissionFileId
-- `/admissions/{admissionId}/files/{fileId}/indicator-records`：按 `admission_file_id` 过滤记录
-- `/indicators/{id}/detail`：introductionText(introduction_text), measurementMethod(measurement_method), clinicalSignificance(clinical_significance), highAdvice/lowAdvice/normalAdvice/generalAdvice，对应字段同名
-- `/admissions/*`：hospital/department/diagnosis/admissionDate/dischargeDate ↔ Admission；文件 `filename/uploaded_at/pages/ocr_done`
-- `/medications/*`：药物字典 ↔ Medication，记录 ↔ MedicationRecord
-- `/kb/*`：文档 ↔ KnowledgeDoc；分块 ↔ KnowledgeChunk
-- `/chat/*`：会话 ↔ ChatSession；消息 ↔ ChatMessage
-- `/ocr/tasks` ↔ OcrTask；`/export/*` ↔ ExportTask；`/system/logs` ↔ SystemLog；`/audit/logs` ↔ AuditLog
-
----
-
-## 迁移建议与示例（SQL 表示，SQLite 方言）
-
-（示例仅列部分关键表，实际以 ORM 迁移工具生成为准）
-
-```sql
-CREATE TABLE indicator (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  code TEXT UNIQUE,
-  owner_user_id INTEGER,
-  name_cn TEXT NOT NULL,
-  name_en TEXT,
-  unit TEXT NOT NULL,
-  category TEXT,
-  reference_min REAL,
-  reference_max REAL,
-  is_builtin INTEGER NOT NULL DEFAULT 0,
-  created_at TEXT NOT NULL,
-  deleted_at TEXT,
-  FOREIGN KEY(owner_user_id) REFERENCES user(id)
-);
-
-CREATE TABLE indicator_record (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  indicator_id INTEGER NOT NULL,
-  user_id INTEGER NOT NULL,
-  measured_at TEXT NOT NULL,
-  value REAL NOT NULL,
-  unit TEXT NOT NULL,
-  ref_low REAL,
-  ref_high REAL,
-  ref_text TEXT,
-  source TEXT NOT NULL,
-  note TEXT,
-  admission_file_id INTEGER,
-  created_at TEXT NOT NULL,
-  deleted_at TEXT,
-  FOREIGN KEY(indicator_id) REFERENCES indicator(id),
-  FOREIGN KEY(user_id) REFERENCES user(id),
-  FOREIGN KEY(admission_file_id) REFERENCES admission_file(id) ON DELETE SET NULL
-);
-
-CREATE UNIQUE INDEX ux_record_indicator_date_source ON indicator_record(user_id, indicator_id, measured_at, source);
-CREATE INDEX idx_record_file ON indicator_record(admission_file_id);
-
-CREATE TABLE indicator_detail (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  indicator_id INTEGER NOT NULL UNIQUE,
-  introduction_text TEXT,
-  measurement_method TEXT,
-  clinical_significance TEXT,
-  high_meaning TEXT,
-  low_meaning TEXT,
-  high_advice TEXT,
-  low_advice TEXT,
-  normal_advice TEXT,
-  general_advice TEXT,
-  unit TEXT,
-  reference_range TEXT,
-  updated_at TEXT NOT NULL,
-  FOREIGN KEY(indicator_id) REFERENCES indicator(id)
-);
-
-CREATE TABLE user_indicator (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL,
-  indicator_id INTEGER NOT NULL,
-  alias TEXT,
-  threshold_min REAL,
-  threshold_max REAL,
-  favorite INTEGER NOT NULL DEFAULT 0,
-  created_at TEXT NOT NULL,
-  UNIQUE(user_id, indicator_id),
-  FOREIGN KEY(user_id) REFERENCES user(id),
-  FOREIGN KEY(indicator_id) REFERENCES indicator(id)
-);
-```
-
----
-
 ## 数据一致性与演进
 - 软删除：业务查询默认过滤 `deleted_at IS NULL`。
 - 多用户过滤：所有列表与详情查询均以当前 `user_id` 作为过滤前提；写入时校验实体归属。对 `IndicatorRecord.admission_file_id` 的写入需校验与 `AdmissionFile.user_id` 一致。
@@ -502,6 +442,11 @@ CREATE TABLE user_indicator (
 ## 命名约定
 - 表名：下划线小写；字段同理。
 - 接口对外字段沿用前端文案（小驼峰），后端映射在序列化层处理。
+
+### 索引命名约定（统一）
+- 普通索引：`idx_<table>_<fields_or_purpose>`，表名与字段名均使用实际表名与字段名的小写；多个字段用下划线连接（如 `idx_indicatorrecord_user_measured`）。
+- 唯一约束：`uq_<table>_<fields>`；如需显式命名时按此约定命名。
+- 高并发或多用户场景优先包含 `user_id` 前缀字段入索引，避免全表扫描。
 
 ## 变更历史
 - v0.1 初版：覆盖指标/住院/用药/知识库/聊天/任务/系统/审计。
