@@ -28,6 +28,7 @@ def _user_to_profile(user: User) -> dict:
         "email": user.email,
         "role": user.role,
         "birthDate": user.birth_date.isoformat() if user.birth_date else None,
+        "gender": user.gender,
         "createdAt": user.created_at.isoformat() if user.created_at else None,
         "lastLogin": user.last_login.isoformat() if user.last_login else None,
     }
@@ -35,28 +36,31 @@ def _user_to_profile(user: User) -> dict:
 
 class RegisterRequest(BaseModel):
     username: str
+    name: str
     password: str
     email: Optional[EmailStr] = None
 
 
 @router.post("/register")
 async def register(data: RegisterRequest, session: AsyncSession = Depends(get_session)):
-    # 唯一性检查
+    # 检查必填字段
     if not data.username or not data.password:
         raise HTTPException(status_code=400, detail="用户名与密码必填")
 
-    existing = await session.execute(select(User).where(User.username == data.username))
+    # 检查用户名唯一性
+    existing = await session.exec(select(User).where(User.username == data.username))
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="用户名已存在")
 
+    # 检查邮箱唯一性
     if data.email:
-        existing_email = await session.execute(select(User).where(User.email == data.email))
+        existing_email = await session.exec(select(User).where(User.email == data.email))
         if existing_email.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="邮箱已被使用")
 
     user = User(
         username=data.username,
-        name=data.username,
+        name=data.name,
         password_hash=_hash_password(data.password),
         email=data.email,
     )
@@ -87,7 +91,7 @@ class LoginRequest(BaseModel):
 
 @router.post("/login")
 async def login(data: LoginRequest, session: AsyncSession = Depends(get_session)):
-    result = await session.execute(select(User).where(User.username == data.username, User.deleted_at.is_(None)))
+    result = await session.exec(select(User).where(User.username == data.username, User.deleted_at.is_(None)))
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=401, detail="用户不存在")
@@ -95,7 +99,7 @@ async def login(data: LoginRequest, session: AsyncSession = Depends(get_session)
     if _hash_password(data.password) != user.password_hash:
         raise HTTPException(status_code=401, detail="密码错误")
 
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.now(datetime.timezone.utc)
     await session.commit()
 
     token = create_jwt_token(user_id=user.id, expire_minutes=10)

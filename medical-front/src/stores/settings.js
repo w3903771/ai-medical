@@ -43,7 +43,67 @@ export const useSettingsStore = defineStore('settings', () => {
   const initSettings = () => {
     modelStore.initModelSettings()
     systemStore.initSystemConfig()
+    // 可选：加载各模块的持久化设置
+    try { exportStore.loadExportSettings() } catch {}
+    try { dataStore.loadDataSettings && dataStore.loadDataSettings() } catch {}
+    try { backupStore.loadBackupSettings && backupStore.loadBackupSettings() } catch {}
+    try { webSearchStore.loadSettings && webSearchStore.loadSettings() } catch {}
+    try { docProcessingStore.loadSettings && docProcessingStore.loadSettings() } catch {}
   }
+
+  // 模型：包装兼容方法
+  const testApiConnection = async (provider) => {
+    return modelStore.handleTestApi(provider)
+  }
+
+  const resetModelConfig = (providerOrId) => {
+    const providers = modelStore.modelProviders
+    const provider = typeof providerOrId === 'string'
+      ? (Array.isArray(providers) ? providers.find(p => p.id === providerOrId) : providers.value?.find(p => p.id === providerOrId))
+      : providerOrId
+    if (provider) {
+      modelStore.handleResetModelConfig(provider)
+    }
+  }
+
+  // 系统：暴露保存与重置（重置为默认字段并应用主题）
+  const saveSystemConfig = () => {
+    systemStore.saveSystemConfig()
+    // 立即应用主题以获得即时反馈
+    systemStore.applyTheme()
+  }
+
+  const resetSystemConfig = () => {
+    // 使用当前 store 的默认结构重置
+    systemStore.systemConfig = {
+      theme: 'light',
+      language: 'zh-CN',
+      fontSize: 'medium',
+      notificationEnabled: true,
+      autoLogout: 30,
+      // 兼容视图中扩展字段（如存在则覆盖）
+      autoUpdate: false,
+      autoStart: false,
+      minimizeToTray: false,
+      proxyType: 'none',
+      proxyHost: '',
+      proxyPort: 0,
+      proxyAuth: false,
+      proxyUsername: '',
+      proxyPassword: ''
+    }
+    systemStore.saveSystemConfig()
+    systemStore.applyTheme()
+  }
+
+  // 数据管理：暴露方法
+  const saveDataSettings = () => dataStore.saveDataSettings()
+  const clearCache = () => dataStore.clearCache && dataStore.clearCache()
+  const resetDataSettings = () => dataStore.resetDataSettings && dataStore.resetDataSettings()
+
+  // 备份设置：暴露方法
+  const saveBackupSettings = () => backupStore.saveBackupSettings && backupStore.saveBackupSettings()
+  const loadBackupSettings = () => backupStore.loadBackupSettings && backupStore.loadBackupSettings()
 
   return {
     // 账号相关
@@ -73,6 +133,8 @@ export const useSettingsStore = defineStore('settings', () => {
 
     // 系统配置相关
     systemConfig: systemStore.systemConfig,
+    saveSystemConfig,
+    resetSystemConfig,
     
     // 导出设置相关
     exportOptionsEnabled: exportStore.exportOptionsEnabled,
@@ -100,7 +162,20 @@ export const useSettingsStore = defineStore('settings', () => {
     docApiEndpoint: docProcessingStore.docApiEndpoint,
     saveDocProcessingSettings: docProcessingStore.saveSettings,
     loadDocProcessingSettings: docProcessingStore.loadSettings,
-    
+
+    // 数据管理方法
+    saveDataSettings,
+    clearCache,
+    resetDataSettings,
+
+    // 备份方法
+    saveBackupSettings,
+    loadBackupSettings,
+
+    // 模型方法兼容映射
+    testApiConnection,
+    resetModelConfig,
+
     // 初始化方法
     initSettings
   }

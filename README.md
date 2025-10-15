@@ -115,4 +115,4 @@ npm run dev
 ---
 
 ## 📄 License
-MIT
+GPL-3.0 License

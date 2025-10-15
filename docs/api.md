@@ -83,7 +83,15 @@ ${request_example}
 - Prefix：`/api/v1`
 - Endpoint：`/auth/register`
 - Method：`POST`
-- Request（Body）：`{ "username": "string", "password": "string", "email": "string(optional)" }`
+- Request（Body）：
+```json
+{
+    "username": "string", 
+    "name": "string", 
+    "password": "string", 
+    "email": "string(optional)" 
+}
+```
 - Response（Body）：`{ "id": 1, "username": "..." }`
 - Notes：用户名唯一；密码使用强哈希（bcrypt/argon2）存储
 
@@ -107,7 +115,15 @@ ${request_example}
 - Prefix：`/api/v1`
 - Endpoint：`/account/profile`
 - Method：`PUT`
-- Request（Body）：`{ "email": "string", "username": "string(optional)" }`
+- Request（Body）：
+```json
+{ 
+  "name": "string",
+  "email": "string", 
+  "gender": "integer",
+  "birthDate": "date"
+}
+```
 - Response（Body）：`{ "code": 200 }`
 - Notes：仅允许更新非敏感字段；`username` 若更新需唯一校验
 
@@ -115,7 +131,13 @@ ${request_example}
 - Prefix：`/api/v1`
 - Endpoint：`/account/password`
 - Method：`PUT`
-- Request（Body）：`{ "oldPassword": "string", "newPassword": "string" }`
+- Request（Body）：
+```json
+{ 
+  "oldPassword": "string", 
+  "newPassword": "string" 
+}
+```
 - Response（Body）：`{ "code": 200 }`
 - Notes：后端校验旧密码；新密码复杂度校验
 

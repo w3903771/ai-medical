@@ -22,6 +22,7 @@ def _user_to_profile(user: User) -> dict:
         "email": user.email,
         "role": user.role,
         "birthDate": user.birth_date.isoformat() if user.birth_date else None,
+        "gender": user.gender,
         "createdAt": user.created_at.isoformat() if user.created_at else None,
         "lastLogin": user.last_login.isoformat() if user.last_login else None,
     }
@@ -33,10 +34,10 @@ async def get_profile(current_user: User = Depends(get_current_user)):
 
 
 class UpdateProfileRequest(BaseModel):
+    name: Optional[str] = None
     email: Optional[EmailStr] = None
-    username: Optional[str] = None
+    gender: Optional[int] = None
     birthDate: Optional[date] = None
-
 
 @router.put("/profile")
 async def update_profile(
@@ -45,23 +46,24 @@ async def update_profile(
     current_user: User = Depends(get_current_user),
 ):
     changed = False
-    if data.username and data.username != current_user.username:
-        # 检查用户名唯一
-        exists = await session.execute(select(User).where(User.username == data.username))
-        if exists.scalar_one_or_none():
-            raise HTTPException(status_code=400, detail="用户名已存在")
-        current_user.username = data.username
+
+    if data.name and data.name != current_user.name:
+        current_user.name = data.name
         changed = True
 
     if data.email and data.email != (current_user.email or None):
         # 检查邮箱唯一
-        exists = await session.execute(select(User).where(User.email == data.email))
+        exists = await session.exec(select(User).where(User.email == data.email))
         if exists.scalar_one_or_none():
             raise HTTPException(status_code=400, detail="邮箱已被使用")
         current_user.email = data.email
         changed = True
 
-    if data.birthDate is not None:
+    if data.gender is not None and data.gender != current_user.gender:
+        current_user.gender = data.gender
+        changed = True
+
+    if data.birthDate is not None and data.birthDate != current_user.birth_date:
         current_user.birth_date = data.birthDate
         changed = True
 

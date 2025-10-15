@@ -8,7 +8,17 @@ export const useSystemStore = defineStore('system', () => {
     language: 'zh-CN',
     fontSize: 'medium',
     notificationEnabled: true,
-    autoLogout: 30
+    autoLogout: 30,
+    // 视图扩展字段（与 SystemConfigSettings.vue 对齐）
+    autoUpdate: false,
+    autoStart: false,
+    minimizeToTray: false,
+    proxyType: 'none',
+    proxyHost: '',
+    proxyPort: 0,
+    proxyAuth: false,
+    proxyUsername: '',
+    proxyPassword: ''
   })
 
   // 保存系统配置
@@ -48,6 +58,28 @@ export const useSystemStore = defineStore('system', () => {
     applyTheme()
   }
 
+  // 重置系统配置到默认值
+  const resetSystemConfig = () => {
+    systemConfig.value = {
+      theme: 'light',
+      language: 'zh-CN',
+      fontSize: 'medium',
+      notificationEnabled: true,
+      autoLogout: 30,
+      autoUpdate: false,
+      autoStart: false,
+      minimizeToTray: false,
+      proxyType: 'none',
+      proxyHost: '',
+      proxyPort: 0,
+      proxyAuth: false,
+      proxyUsername: '',
+      proxyPassword: ''
+    }
+    saveSystemConfig()
+    applyTheme()
+  }
+
   return {
     // 状态
     systemConfig,
@@ -58,6 +90,7 @@ export const useSystemStore = defineStore('system', () => {
     toggleTheme,
     applyTheme,
     setLanguage,
-    initSystemConfig
+    initSystemConfig,
+    resetSystemConfig
   }
 })

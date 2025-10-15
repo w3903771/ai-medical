@@ -58,6 +58,8 @@ SystemLog（系统级独立）
 - password_hash: varchar(255), not null
 - email: varchar(128), unique, null
 - role: varchar(32), not null, default 'user'  // user|admin|developer
+- birth_date: date, null
+- gender: integer, null  // 0/1 男/女
 - created_at: datetime, not null
 - last_login: datetime, null
 - deleted_at: datetime, null

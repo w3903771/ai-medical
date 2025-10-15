@@ -95,15 +95,15 @@
 
                 <el-form-item label="自定义端点">
                   <el-switch 
-                    v-model="selectedProvider.customEndpoint"
+                    v-model="selectedProvider.hasCustomEndpoint"
                     active-text="启用"
                     inactive-text="禁用"
                   />
                 </el-form-item>
 
-                <el-form-item v-if="selectedProvider.customEndpoint" label="端点URL">
+                <el-form-item v-if="selectedProvider.hasCustomEndpoint" label="端点URL">
                   <el-input
-                    v-model="selectedProvider.endpoint"
+                    v-model="selectedProvider.apiUrl"
                     placeholder="请输入自定义端点URL"
                     clearable
                   />
