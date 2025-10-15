@@ -57,10 +57,10 @@ const userStore = useUserStore()
 const loading = ref(false)
 const formRef = ref(null)
 const form = ref({
-  username: '',
-  email: '',
-  password: '',
-  confirmPassword: ''
+  username: 'w3903771',
+  email: 'wuxiaolong8001@163.com',
+  password: '123456',
+  confirmPassword: '123456'
 })
 
 const rules = {

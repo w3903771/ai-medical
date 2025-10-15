@@ -1,11 +1,9 @@
-from __future__ import annotations
-
 from typing import Optional
 from datetime import datetime, date
 from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy.orm import Mapped
 from sqlalchemy import UniqueConstraint, Index
 from .base import IDMixin, TimestampMixin, SoftDeleteMixin
-from .indicator_detail import IndicatorDetail
 
 # 指标分类与指标模型
 
@@ -15,7 +13,6 @@ class Category(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
     description: Optional[str] = None  # 分类描述
 
     indicators: list["Indicator"] = Relationship(back_populates="category")
-
 
 class Indicator(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
     __table_args__ = (
@@ -30,10 +27,9 @@ class Indicator(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
     reference_max: Optional[float] = Field(default=None)  # 参考上限
     is_builtin: bool = Field(default=False, index=True)  # 是否内置指标
     
-    category: Optional[Category] = Relationship(back_populates="indicators")
-    records: list["IndicatorRecord"] = Relationship(back_populates="indicator")
-    detail: Optional[IndicatorDetail] = Relationship(back_populates="indicator", sa_relationship_kwargs={"uselist": False})
-
+    records: Mapped[list["IndicatorRecord"]] = Relationship(back_populates="indicator")
+    detail: Mapped[Optional["IndicatorDetail"]] = Relationship(back_populates="indicator", sa_relationship_kwargs={"uselist": False})
+    category: Mapped[Optional["Category"]] = Relationship(back_populates="indicators")
 
 class IndicatorRecord(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
     __table_args__ = (
@@ -54,4 +50,21 @@ class IndicatorRecord(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=
     note: Optional[str] = None  # 备注
     admission_file_id: Optional[int] = Field(default=None, foreign_key="admissionfile.id", index=True)  # 关联住院文件ID
 
-    indicator: Optional[Indicator] = Relationship(back_populates="records")
+    indicator: Mapped["Indicator"] = Relationship(back_populates="records")
+
+class IndicatorDetail(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
+    indicator_id: int = Field(foreign_key="indicator.id", index=True, unique=True)
+    introduction_text: Optional[str] = None
+    measurement_method: Optional[str] = None
+    clinical_significance: Optional[str] = None
+    high_meaning: Optional[str] = None
+    low_meaning: Optional[str] = None
+    high_advice: Optional[str] = None
+    low_advice: Optional[str] = None
+    normal_advice: Optional[str] = None
+    general_advice: Optional[str] = None
+    unit: Optional[str] = None
+    reference_range: Optional[str] = None
+    updated_at: Optional[datetime] = Field(default_factory=datetime.now, index=True, nullable=False)
+
+    indicator: Mapped["Indicator"] = Relationship(back_populates="detail")

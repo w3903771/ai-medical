@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { useUserStore } from './user'
 
 export const useAccountStore = defineStore('account', () => {
+  const userStore = useUserStore()
   // 账号信息
   const accountForm = ref({
-    username: 'admin',
-    email: 'admin@example.com',
+    username: '',
+    email: '',
     phone: '13800138000',
-    gender: 'male',
     birthDate: '1990-01-01'
   })
 
@@ -18,30 +19,55 @@ export const useAccountStore = defineStore('account', () => {
     confirmPassword: ''
   })
 
-  // 保存账号信息
-  const saveAccountInfo = () => {
-    // 这里可以添加保存账号信息的逻辑
-    localStorage.setItem('accountInfo', JSON.stringify(accountForm.value))
-  }
-
-  // 加载账号信息
-  const loadAccountInfo = () => {
-    const stored = localStorage.getItem('accountInfo')
-    if (stored) {
-      accountForm.value = JSON.parse(stored)
+  // 保存账号信息（与后端对齐：username/email）
+  const saveAccountInfo = async () => {
+    await userStore.updateProfile({
+      email: accountForm.value.email,
+      username: accountForm.value.username,
+      birthDate: accountForm.value.birthDate
+    })
+    // 仅本地保存扩展字段（phone）
+    const localOnly = {
+      phone: accountForm.value.phone
     }
-  }
-
-  // 修改密码
-  const changePassword = () => {
-    // 这里可以添加修改密码的逻辑
-    // 实际应用中需要与后端API交互
-    passwordForm.value = {
-      oldPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    }
+    localStorage.setItem('accountInfo.extra', JSON.stringify(localOnly))
     return true
+  }
+
+  // 加载账号信息（优先使用后端资料）
+  const loadAccountInfo = async () => {
+    try {
+      if (!userStore.userInfo.username) {
+        await userStore.fetchProfile()
+      }
+      accountForm.value.username = userStore.userInfo.username || accountForm.value.username
+      accountForm.value.email = userStore.userInfo.email || accountForm.value.email
+      accountForm.value.birthDate = userStore.userInfo.birthDate || accountForm.value.birthDate
+    } catch {}
+
+    const storedExtra = localStorage.getItem('accountInfo.extra')
+    if (storedExtra) {
+      try {
+        const extra = JSON.parse(storedExtra)
+        accountForm.value.phone = extra.phone ?? accountForm.value.phone
+      } catch {}
+    }
+  }
+
+  // 修改密码（与后端交互）
+  const changePassword = async () => {
+    const ok = await userStore.changePassword({
+      oldPassword: passwordForm.value.oldPassword,
+      newPassword: passwordForm.value.newPassword
+    })
+    if (ok) {
+      passwordForm.value = {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }
+    }
+    return ok
   }
 
   return {

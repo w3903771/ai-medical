@@ -1,8 +1,7 @@
-from __future__ import annotations
-
 from typing import Optional
 from datetime import date, datetime
 from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy.orm import Mapped
 from sqlalchemy import UniqueConstraint, Index
 from .base import IDMixin, TimestampMixin, SoftDeleteMixin
 
@@ -14,7 +13,7 @@ class AdmissionFolder(IDMixin, SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id", index=True, nullable=False)  # 用户ID
     year: int = Field(index=True, nullable=False)  # 年
     month: int = Field(index=True, nullable=False)  # 月
-    admissions: list["Admission"] = Relationship(back_populates="folder")
+    admissions: Mapped[list["Admission"]] = Relationship(back_populates="folder")
 
 
 class Admission(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):

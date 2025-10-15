@@ -117,12 +117,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useSettingsStore } from '@/stores/settings'
+import { useAccountStore } from '@/stores/account'
 
 const settingsStore = useSettingsStore()
 const { accountForm, passwordForm } = settingsStore
+const accountStore = useAccountStore()
 
 // 表单引用
 const accountFormRef = ref(null)
@@ -179,10 +181,15 @@ const handleEditUsername = () => {
 const handleSubmitUsername = async () => {
   try {
     await usernameFormRef.value.validate()
-    // 这里可以添加API调用来更新用户名
+    // 更新本地字段并调用保存（与后端同步）
     accountForm.username = newUsername.value
-    ElMessage.success('用户名修改成功')
-    usernameDialogVisible.value = false
+    const ok = await accountStore.saveAccountInfo()
+    if (ok) {
+      ElMessage.success('用户名修改成功')
+      usernameDialogVisible.value = false
+    } else {
+      ElMessage.error('用户名修改失败')
+    }
   } catch (error) {
     console.error('表单验证失败:', error)
   }
@@ -191,7 +198,12 @@ const handleSubmitUsername = async () => {
 const handleUpdateAccount = async () => {
   try {
     await accountFormRef.value.validate()
-    ElMessage.success('账号信息更新成功')
+    const ok = await accountStore.saveAccountInfo()
+    if (ok) {
+      ElMessage.success('账号信息更新成功')
+    } else {
+      ElMessage.error('账号信息更新失败')
+    }
   } catch (error) {
     console.error('表单验证失败:', error)
   }
@@ -204,8 +216,13 @@ const resetAccountForm = () => {
 const handleUpdatePassword = async () => {
   try {
     await passwordFormRef.value.validate()
-    ElMessage.success('密码修改成功')
-    resetPasswordForm()
+    const ok = await accountStore.changePassword()
+    if (ok) {
+      ElMessage.success('密码修改成功')
+      resetPasswordForm()
+    } else {
+      ElMessage.error('密码修改失败')
+    }
   } catch (error) {
     console.error('表单验证失败:', error)
   }
@@ -214,6 +231,15 @@ const handleUpdatePassword = async () => {
 const resetPasswordForm = () => {
   passwordFormRef.value.resetFields()
 }
+
+// 页面挂载时，从后端加载账号信息（与当前登录用户同步）
+onMounted(async () => {
+  try {
+    await accountStore.loadAccountInfo()
+  } catch (e) {
+    // 忽略加载错误（未登录或网络问题）
+  }
+})
 </script>
 
 <style scoped>

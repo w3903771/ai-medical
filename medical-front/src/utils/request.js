@@ -31,15 +31,16 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   response => {
-    // 对响应数据做点什么
-    const { code, message, data } = response.data
-    
-    if (code === 200) {
-      return data
-    } else {
+    // 兼容两种返回：统一包裹 {code,message,data} 与原始 JSON
+    const payload = response.data
+    if (payload && typeof payload === 'object' && 'code' in payload) {
+      const { code, message, data } = payload
+      if (code === 200) return data
       ElMessage.error(message || '请求失败')
       return Promise.reject(new Error(message || '请求失败'))
     }
+    // 无统一包裹时直接返回原始数据（如健康检查等）
+    return payload
   },
   error => {
     // 对响应错误做点什么
@@ -58,13 +59,13 @@ request.interceptors.response.use(
           ElMessage.error('拒绝访问')
           break
         case 404:
-          ElMessage.error('请求地址出错')
+          ElMessage.error('资源不存在')
           break
         case 500:
-          ElMessage.error('服务器内部错误')
+          ElMessage.error('服务器错误，请稍后重试')
           break
         default:
-          ElMessage.error(data?.message || '请求失败')
+          ElMessage.error(data?.message || `请求失败(${status})`)
       }
     } else if (error.request) {
       ElMessage.error('网络错误，请检查网络连接')

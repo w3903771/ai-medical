@@ -65,6 +65,14 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   const isPublic = to.meta?.public || ['/login', '/register'].includes(to.path)
+  // 支持基于本地 token 的快速恢复，避免首次导航误判
+  if (!userStore.isLoggedIn) {
+    const token = localStorage.getItem('token')
+    if (token) {
+      // 仅标记为已登录，实际资料在 App.vue 中拉取
+      userStore.isLoggedIn = true
+    }
+  }
   if (!isPublic && !userStore.isLoggedIn) {
     next({ path: '/login' })
   } else {

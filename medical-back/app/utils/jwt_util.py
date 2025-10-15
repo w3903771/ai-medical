@@ -10,7 +10,7 @@ SECRET_KEY = 'your-secret-key'  # 请根据实际项目配置调整
 ALGORITHM = 'HS256'
 
 
-def create_jwt_token(user_id: int, expire_minutes: int = 60) -> str:
+def create_jwt_token(user_id: int, expire_minutes: int = 10) -> str:
     payload = {
         'user_id': user_id,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=expire_minutes)
