@@ -102,6 +102,7 @@ ${request_example}
 - Request（Headers）：`Authorization: Bearer <token>`
 - Response（Body）：同登录
 - Notes：用于延长会话有效期
+ - Status：当前后端未实现；前端不调用该端点。
 
 ### 获取用户信息（Get Profile）
 - Prefix：`/api/v1`
@@ -124,7 +125,8 @@ ${request_example}
   "birthDate": "date"
 }
 ```
-- Response（Body）：`{ "code": 200 }`
+ - Response（Body）：`{ "success": true }`
+ - Notes：邮箱唯一约束；当前后端返回原始 JSON（未使用统一 `{code,message,data}` 包裹）。
 - Notes：仅允许更新非敏感字段；`username` 若更新需唯一校验
 
 ### 修改密码（Change Password）
@@ -138,7 +140,8 @@ ${request_example}
   "newPassword": "string" 
 }
 ```
-- Response（Body）：`{ "code": 200 }`
+ - Response（Body）：`{ "success": true }`
+ - Notes：错误时返回 `{"detail":"旧密码不正确"}`。
 - Notes：后端校验旧密码；新密码复杂度校验
 
 ### 登出（Logout）
@@ -146,7 +149,7 @@ ${request_example}
 - Endpoint：`/auth/logout`
 - Method：`POST`
 - Request：`{}` 或仅头部携带当前令牌
-- Response（Body）：`{ "code": 200 }`
+ - Response（Body）：`{ "success": true }`
 - Notes：前端清除本地令牌；后端可加入黑名单（可选）
 
 ---
@@ -927,16 +930,45 @@ axios.post('/api/v1/llm/analyzeMetrics',{
 - 统一结构：`{ code, message, data, timestamp, traceId }`；`message`为用户可读文案；`timestamp`为 ISO 8601；`traceId`用于日志关联。
 - 响应头建议：`X-Request-ID`、`X-Trace-ID`（CORS 暴露）。
 - 条件请求（可选）：返回 `ETag`/`Last-Modified`，前端可使用 `If-None-Match` 实现缓存命中。
-- 前端拦截器约定：以 `code===200` 作为成功判断，返回 `data`；401 触发清理本地令牌并跳转登录。
+ - 前端拦截器约定：兼容两种返回形式（统一包裹 `{code,message,data}` 与原始 JSON）；401 触发清理本地令牌并跳转登录；当 FastAPI 抛出 `HTTPException` 时优先显示 `detail`。
 
 ### 鉴权与会话补充
-- 获取当前用户信息（初始化）
-  - Endpoint：`GET /api/v1/auth/me`
-  - Response：`{ "code":200, "message":"success", "data": { "id": 1, "username": "...", "email": "...", "role": "user", "lastLogin": "YYYY-MM-DDTHH:mm:ssZ" }, "timestamp":"<iso>", "traceId":"..." }`
+ - 获取当前用户信息（初始化）
+   - Endpoint：`GET /api/v1/auth/me`（未实现）
+   - Notes：前端通过 `GET /api/v1/account/profile` 初始化用户信息。
 - 退出登录（清理服务端状态，可选）
   - Endpoint：`POST /api/v1/auth/logout`
-  - Response：`{ "code":200, "message":"success", "data": {}, "timestamp":"<iso>", "traceId":"..." }`
+  - Response：`{ "success": true }`
 - 刷新令牌：沿用 `POST /auth/refresh`，明确返回结构与过期策略（TTL、缓冲窗口）。
+
+---
+
+## 前端集成说明（Pinia 与路由）
+
+- 请求基础配置：
+  - `baseURL`: `/api/v1`（Vite 开发代理到 `http://127.0.0.1:8001`）
+  - 请求拦截器：自动注入 `Authorization: Bearer <token>`
+  - 响应拦截器：兼容 `{code,message,data}` 与原始 JSON；401 清除令牌并跳转登录；错误优先显示 `detail`。
+
+- 用户状态（`src/stores/user.js`）：
+  - `userInfo`: `{ id, username, name, email, role, gender, createdAt, lastLogin, birthDate }`
+  - `isLoggedIn`: 布尔值；根据令牌与资料拉取维护登录状态。
+  - 动作与端点映射：
+    - `login({username,password})` → `POST /auth/login`；保存 `token` 与 `user`。
+    - `register({username,name,email,password})` → `POST /auth/register`；返回 `{id,username}`。
+    - `initUserInfo()`/`fetchProfile()` → `GET /account/profile`；会话恢复与资料拉取。
+    - `updateProfile({email,name,gender,birthDate})` → `PUT /account/profile`；返回 `{success:true}` 后刷新资料。
+    - `changePassword({oldPassword,newPassword})` → `PUT /account/password`；返回 `{success:true}`。
+    - `logout()` → `POST /auth/logout`（无状态）；前端清理令牌与路由跳转。
+
+- 设置中心账户（`src/stores/account.js` 与 `views/settings/AccountSettings.vue`）：
+  - `saveAccountInfo()`：委托 `userStore.updateProfile`，返回真实结果；失败时 UI 显示错误。
+  - `loadAccountInfo()`：优先从后端拉取并填充表单。
+  - `changePassword()`：调用 `userStore.changePassword`，成功后重置表单。
+
+- 路由守卫（`src/router/index.js`）：
+  - 未登录访问非 `meta.public` 路由时重定向到 `/login`。
+  - 首次导航支持基于本地令牌的快速恢复；实际资料在 `App.vue` 的 `initUserInfo()` 拉取。
 
 ### 初始化与聚合端点（Pinia 友好）
 - 应用引导（Bootstrap）

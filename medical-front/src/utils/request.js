@@ -65,7 +65,7 @@ request.interceptors.response.use(
           ElMessage.error('服务器错误，请稍后重试')
           break
         default:
-          ElMessage.error(data?.message || `请求失败(${status})`)
+          ElMessage.error(data?.message || data?.detail || `请求失败(${status})`)
       }
     } else if (error.request) {
       ElMessage.error('网络错误，请检查网络连接')

@@ -2,14 +2,17 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useUserStore } from './user'
 
+// For account info management in settings
 export const useAccountStore = defineStore('account', () => {
   const userStore = useUserStore()
   // 账号信息
   const accountForm = ref({
     username: '',
+    name: '',
     email: '',
-    phone: '13800138000',
-    birthDate: '1990-01-01'
+    role: '',
+    gender: null,
+    birthDate: ''
   })
 
   // 密码表单
@@ -19,19 +22,19 @@ export const useAccountStore = defineStore('account', () => {
     confirmPassword: ''
   })
 
-  // 保存账号信息（与后端对齐：username/email）
+  // 保存账号信息（与后端对齐：email/name/gender/birthDate）
   const saveAccountInfo = async () => {
-    await userStore.updateProfile({
-      email: accountForm.value.email,
-      username: accountForm.value.username,
-      birthDate: accountForm.value.birthDate
-    })
-    // 仅本地保存扩展字段（phone）
-    const localOnly = {
-      phone: accountForm.value.phone
+    try {
+      const ok = await userStore.updateProfile({
+        email: accountForm.value.email,
+        name: accountForm.value.name,
+        gender: accountForm.value.gender,
+        birthDate: accountForm.value.birthDate
+      })
+      return ok
+    } catch {
+      return false
     }
-    localStorage.setItem('accountInfo.extra', JSON.stringify(localOnly))
-    return true
   }
 
   // 加载账号信息（优先使用后端资料）
@@ -41,17 +44,12 @@ export const useAccountStore = defineStore('account', () => {
         await userStore.fetchProfile()
       }
       accountForm.value.username = userStore.userInfo.username || accountForm.value.username
+      accountForm.value.name = userStore.userInfo.name || accountForm.value.name
       accountForm.value.email = userStore.userInfo.email || accountForm.value.email
+      accountForm.value.role = userStore.userInfo.role || accountForm.value.role
+      accountForm.value.gender = (userStore.userInfo.gender ?? accountForm.value.gender)
       accountForm.value.birthDate = userStore.userInfo.birthDate || accountForm.value.birthDate
     } catch {}
-
-    const storedExtra = localStorage.getItem('accountInfo.extra')
-    if (storedExtra) {
-      try {
-        const extra = JSON.parse(storedExtra)
-        accountForm.value.phone = extra.phone ?? accountForm.value.phone
-      } catch {}
-    }
   }
 
   // 修改密码（与后端交互）

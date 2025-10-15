@@ -11,6 +11,7 @@ export const useUserStore = defineStore('user', () => {
     name: '',
     email: '',
     role: '',
+    gender: null,
     createdAt: '',
     lastLogin: '',
     birthDate: ''
@@ -33,8 +34,13 @@ export const useUserStore = defineStore('user', () => {
     userInfo.value = {
       id: null,
       username: '',
+      name: '',
       email: '',
-      role: ''
+      role: '',
+      gender: null,
+      createdAt: '',
+      lastLogin: '',
+      birthDate: ''
     }
     isLoggedIn.value = false
     localStorage.removeItem('token')
@@ -57,6 +63,7 @@ export const useUserStore = defineStore('user', () => {
           name: profile.name ?? userInfo.value.name,
           email: profile.email ?? userInfo.value.email,
           role: profile.role ?? userInfo.value.role,
+          gender: profile.gender ?? userInfo.value.gender,
           createdAt: profile.createdAt ?? userInfo.value.createdAt,
           lastLogin: profile.lastLogin ?? userInfo.value.lastLogin,
           birthDate: profile.birthDate ?? userInfo.value.birthDate,
@@ -90,8 +97,8 @@ export const useUserStore = defineStore('user', () => {
   }
 
   // 注册
-  const register = async ({ username, email, password }) => {
-    const res = await request.post('/auth/register', { username, email, password })
+  const register = async ({ username, name, email, password }) => {
+    const res = await request.post('/auth/register', { username, name, email, password })
     // 返回 { id, username } 或包裹数据
     return !!res
   }
@@ -106,6 +113,7 @@ export const useUserStore = defineStore('user', () => {
         name: profile.name ?? '',
         email: profile.email ?? '',
         role: profile.role ?? '',
+        gender: profile.gender ?? null,
         createdAt: profile.createdAt ?? '',
         lastLogin: profile.lastLogin ?? '',
         birthDate: profile.birthDate ?? ''
@@ -114,12 +122,13 @@ export const useUserStore = defineStore('user', () => {
     return profile
   }
 
-  // 更新用户资料（仅允许 email/username）
-  const updateProfile = async ({ email, username, birthDate }) => {
+  // 更新用户资料（允许 email/name/gender/birthDate）
+  const updateProfile = async ({ email, name, gender, birthDate }) => {
     const payload = {}
-    if (typeof email === 'string') payload.email = email
-    if (typeof username === 'string') payload.username = username
-    if (typeof birthDate === 'string') payload.birthDate = birthDate
+    if (typeof email === 'string' && email) payload.email = email
+    if (typeof name === 'string' && name) payload.name = name
+    if (gender !== undefined && gender !== null) payload.gender = Number(gender)
+    if (typeof birthDate === 'string' && birthDate) payload.birthDate = birthDate
     const res = await request.put('/account/profile', payload)
     // 成功后刷新本地资料
     await fetchProfile()

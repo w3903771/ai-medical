@@ -26,6 +26,9 @@
           <el-form-item label="用户名" prop="username">
             <el-input v-model="form.username" placeholder="请输入用户名" />
           </el-form-item>
+          <el-form-item label="昵称" prop="name">
+            <el-input v-model="form.name" placeholder="请输入昵称" />
+          </el-form-item>
           <el-form-item label="邮箱" prop="email">
             <el-input v-model="form.email" placeholder="请输入邮箱" />
           </el-form-item>
@@ -58,6 +61,7 @@ const loading = ref(false)
 const formRef = ref(null)
 const form = ref({
   username: 'w3903771',
+  name: '',
   email: 'wuxiaolong8001@163.com',
   password: '123456',
   confirmPassword: '123456'
@@ -65,6 +69,7 @@ const form = ref({
 
 const rules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  name: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '邮箱格式不正确', trigger: 'blur' }
@@ -81,7 +86,7 @@ const handleRegister = () => {
     if (!valid) return
     loading.value = true
     try {
-      await userStore.register({ username: form.value.username, email: form.value.email, password: form.value.password })
+      await userStore.register({ username: form.value.username, name: form.value.name, email: form.value.email, password: form.value.password })
       ElMessage.success('注册成功，请登录')
       router.push('/login')
     } catch (e) {

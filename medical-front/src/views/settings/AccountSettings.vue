@@ -12,23 +12,20 @@
         label-width="100px"
         class="account-form"
       >
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="accountForm.username" disabled>
+        <el-form-item label="昵称" prop="name">
+          <el-input v-model="accountForm.name" disabled>
             <template #append>
-              <el-button @click="handleEditUsername">修改</el-button>
+              <el-button @click="handleEditName">修改</el-button>
             </template>
           </el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="accountForm.email" />
         </el-form-item>
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="accountForm.phone" />
-        </el-form-item>
         <el-form-item label="性别" prop="gender">
           <el-radio-group v-model="accountForm.gender">
-            <el-radio label="male">男</el-radio>
-            <el-radio label="female">女</el-radio>
+            <el-radio :label="0">男</el-radio>
+            <el-radio :label="1">女</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="出生日期" prop="birthDate">
@@ -39,6 +36,9 @@
             format="YYYY-MM-DD"
             value-format="YYYY-MM-DD"
           />
+        </el-form-item>
+        <el-form-item label="角色">
+          <el-tag type="info">{{ accountForm.role || 'user' }}</el-tag>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleUpdateAccount">保存修改</el-button>
@@ -90,26 +90,26 @@
       </el-form>
     </el-card>
 
-    <!-- 用户名修改对话框 -->
+    <!-- 昵称修改对话框 -->
     <el-dialog
-      v-model="usernameDialogVisible"
-      title="修改用户名"
+      v-model="nameDialogVisible"
+      title="修改昵称"
       width="30%"
     >
       <el-form
-        ref="usernameFormRef"
-        :model="{ newUsername }"
-        :rules="{ newUsername: [{ required: true, message: '请输入新用户名', trigger: 'blur' }] }"
+        ref="nameFormRef"
+        :model="{ newName }"
+        :rules="{ newName: [{ required: true, message: '请输入新昵称', trigger: 'blur' }] }"
         label-width="100px"
       >
-        <el-form-item label="新用户名" prop="newUsername">
-          <el-input v-model="newUsername" placeholder="请输入新用户名" />
+        <el-form-item label="新昵称" prop="newName">
+          <el-input v-model="newName" placeholder="请输入新昵称" />
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
-          <el-button @click="usernameDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleSubmitUsername">确认</el-button>
+          <el-button @click="nameDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="handleSubmitName">确认</el-button>
         </span>
       </template>
     </el-dialog>
@@ -129,21 +129,17 @@ const accountStore = useAccountStore()
 // 表单引用
 const accountFormRef = ref(null)
 const passwordFormRef = ref(null)
-const usernameFormRef = ref(null)
+const nameFormRef = ref(null)
 
-// 用户名修改对话框
-const usernameDialogVisible = ref(false)
-const newUsername = ref('')
+// 昵称修改对话框
+const nameDialogVisible = ref(false)
+const newName = ref('')
 
 // 账号表单验证规则
 const accountFormRules = {
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
-  ],
-  phone: [
-    { required: true, message: '请输入手机号', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
   ]
 }
 
@@ -171,24 +167,24 @@ const passwordFormRules = {
   ]
 }
 
-// 处理用户名修改按钮点击
-const handleEditUsername = () => {
-  newUsername.value = accountForm.username
-  usernameDialogVisible.value = true
+// 处理昵称修改按钮点击
+const handleEditName = () => {
+  newName.value = accountForm.name
+  nameDialogVisible.value = true
 }
 
-// 提交用户名修改
-const handleSubmitUsername = async () => {
+// 提交昵称修改
+const handleSubmitName = async () => {
   try {
-    await usernameFormRef.value.validate()
+    await nameFormRef.value.validate()
     // 更新本地字段并调用保存（与后端同步）
-    accountForm.username = newUsername.value
+    accountForm.name = newName.value
     const ok = await accountStore.saveAccountInfo()
     if (ok) {
-      ElMessage.success('用户名修改成功')
-      usernameDialogVisible.value = false
+      ElMessage.success('昵称修改成功')
+      nameDialogVisible.value = false
     } else {
-      ElMessage.error('用户名修改失败')
+      ElMessage.error('昵称修改失败')
     }
   } catch (error) {
     console.error('表单验证失败:', error)

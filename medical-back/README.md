@@ -108,6 +108,29 @@ SQLITE_URL=sqlite+aiosqlite:///./medical.sqlite3
 - 前端拦截器期望统一响应结构：`{ code, message, data }` 且 `code === 200` 时视为成功。
 - 当前健康检查返回 `{ status: "ok" }`，不影响前端页面加载；建议后续接口按统一结构返回，或调整前端拦截器兼容多种格式。
 
+## 已实现接口摘要（Auth & Account）
+- 前缀：`/api/v1`（见 `app/core/settings.py`）
+
+- 鉴权（Auth）：
+  - `POST /auth/register`：请求体包含 `username,name,password,email(optional)`；返回 `{ id, username }`；失败返回 `HTTPException(detail)`。
+  - `POST /auth/login`：请求体 `{ username, password }`；返回 `{ token, expiresIn, user }`，其中 `user` 为精简的个人资料结构；401 时 `detail` 为“用户不存在/密码错误”。
+  - `POST /auth/logout`：无状态；返回 `{ success: true }`。
+  - 刷新令牌：当前未实现（`/auth/refresh`）。
+
+- 账户（Account）：
+  - `GET /account/profile`：返回用户资料对象（`id, username, name, email, role, birthDate, gender, createdAt, lastLogin`）。
+  - `PUT /account/profile`：请求体 `{ email, name, gender, birthDate }`；返回 `{ success: true }`；邮箱唯一约束冲突时返回 `HTTPException(detail)`。
+  - `PUT /account/password`：请求体 `{ oldPassword, newPassword }`；返回 `{ success: true }`；旧密码错误时返回 `HTTPException(detail)`。
+
+- 错误语义：
+  - 所有错误通过 FastAPI 的 `HTTPException` 返回，`detail` 字段用于前端提示。
+  - 常见 401/403/404/422/500 均按照语义返回；前端拦截器已优先显示 `detail`。
+
+- 前端约定（参考 `medical-front/src/utils/request.js`）：
+  - Axios 基础地址 `/api/v1`，开发代理到 `http://127.0.0.1:8001`。
+  - 请求拦截器自动注入 `Authorization: Bearer <token>`。
+  - 响应拦截器兼容 `{code,message,data}` 与原始 JSON；401 自动清理并跳转登录；错误优先显示 `detail`。
+
 ## 常见问题
 - SQLite 文件路径在 Windows 下建议使用绝对路径并包含驱动前缀（如 `sqlite+aiosqlite:///c:/data/medical.sqlite3`）。
 - 首次启动会自动创建数据表；若结构变更，需重建或迁移（当前未引入迁移框架）。

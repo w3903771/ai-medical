@@ -183,8 +183,20 @@ yarn preview
 - 登录与注册：前端提供 `Login.vue` 与 `Register.vue` 页面，路由分别为 `/login` 与 `/register`。
 - 令牌存储：登录成功后将 `token` 存入 `localStorage`，并在请求拦截器中自动附加 `Authorization: Bearer <token>`。
 - 路由守卫：未登录访问受保护页面时自动重定向至 `/login`；登录后访问 `/login` 会重定向至首页。
-- 401 处理：响应拦截器在收到 `401` 时清除本地令牌并跳转到 `/login`。
-- 用户信息：应用启动时在 `App.vue` 调用 `userStore.initUserInfo()`，从本地拉取令牌并可调用 `/account/profile` 初始化用户信息。
+ - 401 处理：响应拦截器在收到 `401` 时清除本地令牌并跳转到 `/login`；默认错误提示优先显示后端 `detail` 字段。
+ - 返回结构：后端当前返回原始 JSON（无统一 `{code,message,data}` 包裹）；拦截器已兼容两种形式。
+ - 用户信息：应用启动时在 `App.vue` 调用 `userStore.initUserInfo()`，从本地令牌恢复并通过 `/account/profile` 初始化用户信息。
+ 
+ #### 前端 Pinia 状态与交互
+ - `useUserStore`：管理 `userInfo` 与 `isLoggedIn`；动作包括：
+   - `login` → `POST /auth/login`；成功后保存 `token` 并设置用户信息。
+   - `register` → `POST /auth/register`；请求体包含 `username,name,email,password`。
+   - `initUserInfo`/`fetchProfile` → `GET /account/profile`；用于会话恢复与资料拉取。
+   - `updateProfile` → `PUT /account/profile`；支持 `email/name/gender/birthDate`；返回 `{success:true}` 后刷新资料。
+   - `changePassword` → `PUT /account/password`；请求体 `{oldPassword,newPassword}`；返回 `{success:true}`。
+   - `logout` → `POST /auth/logout`（无状态）；清理前端令牌与用户信息并跳转登录。
+ - `request.js`：`baseURL=/api/v1`；自动注入 `Bearer token`；401 自动清理并重定向；错误提示兼容 `message/detail`。
+ - 路由守卫：基于 `userStore.isLoggedIn` 与 `route.meta.public` 控制访问；首次导航支持基于本地令牌的快速恢复。
 - 后端接口：详见 `docs/api.md` 的“鉴权（Auth）”章节，包括登录、注册、刷新令牌、用户资料与密码修改。
 
 #### 开发阶段 Mock 账号
