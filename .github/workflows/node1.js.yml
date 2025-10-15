@@ -16,12 +16,13 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - uses: actions/checkout@v4
-    - run: cd /medical-front
+    - run: ls -a
+    - run: cd ./medical-front
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
