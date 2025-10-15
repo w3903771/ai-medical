@@ -1,0 +1,256 @@
+{
+  "dataset_version": "v1.1.0",
+  "generated_at": "2025-10-15",
+  "categories": [
+    {
+      "name": "血常规",
+      "description": "血液学基础指标",
+      "members": [
+        { "name_cn": "白细胞计数" },
+        { "name_cn": "红细胞计数" },
+        { "name_cn": "血红蛋白" },
+        { "name_cn": "血小板计数" }
+      ]
+    },
+    {
+      "name": "尿常规",
+      "description": "尿液分析基础指标",
+      "members": [
+        { "name_cn": "尿蛋白" },
+        { "name_cn": "尿潜血" },
+        { "name_cn": "尿红细胞" },
+        { "name_cn": "尿白细胞" },
+        { "name_cn": "尿比重" },
+        { "name_cn": "亚硝酸盐(尿)" }
+      ]
+    },
+    {
+      "name": "粪便常规",
+      "description": "粪便分析与隐血",
+      "members": [
+        { "name_cn": "便常规" },
+        { "name_cn": "便隐血" }
+      ]
+    },
+    {
+      "name": "肝功能",
+      "description": "肝功能相关生化",
+      "members": [
+        { "name_cn": "丙氨酸氨基转移酶" },
+        { "name_cn": "天门冬氨酸氨基转移酶" },
+        { "name_cn": "总胆红素" },
+        { "name_cn": "直接胆红素" },
+        { "name_cn": "间接胆红素" },
+        { "name_cn": "总蛋白" },
+        { "name_cn": "白蛋白" },
+        { "name_cn": "球蛋白" },
+        { "name_cn": "谷氨酰转移酶" },
+        { "name_cn": "碱性磷酸酶" }
+      ]
+    },
+    {
+      "name": "肾功能",
+      "description": "肾功能相关",
+      "members": [
+        { "name_cn": "尿素氮" },
+        { "name_cn": "肌酐" },
+        { "name_cn": "尿白蛋白/肌酐比值" }
+      ]
+    },
+    {
+      "name": "血脂",
+      "description": "血脂谱",
+      "members": [
+        { "name_cn": "总胆固醇" },
+        { "name_cn": "甘油三酯" },
+        { "name_cn": "低密度脂蛋白胆固醇" },
+        { "name_cn": "高密度脂蛋白胆固醇" }
+      ]
+    },
+    {
+      "name": "血糖",
+      "description": "糖代谢指标",
+      "members": [
+        { "name_cn": "空腹血糖" },
+        { "name_cn": "糖化血红蛋白" },
+        { "name_cn": "餐后2小时血糖" },
+        { "name_cn": "糖耐量试验" }
+      ]
+    },
+    {
+      "name": "尿酸",
+      "description": "嘌呤代谢",
+      "members": [ { "name_cn": "尿酸" } ]
+    },
+    {
+      "name": "甲状腺功能",
+      "description": "甲状腺轴相关",
+      "members": [
+        { "name_cn": "总甲状腺素" },
+        { "name_cn": "游离甲状腺素" },
+        { "name_cn": "促甲状腺刺激素" }
+      ]
+    },
+    {
+      "name": "高血压筛查",
+      "description": "高血压及靶器官评估",
+      "members": [
+        { "name_cn": "血压" },
+        { "name_cn": "血钾" },
+        { "name_cn": "血钠" },
+        { "name_cn": "空腹血糖" },
+        { "name_cn": "糖化血红蛋白" },
+        { "name_cn": "尿酸" },
+        { "name_cn": "肌酐" },
+        { "name_cn": "尿白蛋白/肌酐比值" },
+        { "name_cn": "心电图" },
+        { "name_cn": "肾脏超声" },
+        { "name_cn": "眼底检查" },
+        { "name_cn": "胸部X线片" },
+        { "name_cn": "脉搏波速度" },
+        { "name_cn": "人体成分分析" }
+      ]
+    },
+    {
+      "name": "冠心病筛查",
+      "description": "冠状动脉疾病筛查",
+      "members": [
+        { "name_cn": "血压" },
+        { "name_cn": "空腹血糖" },
+        { "name_cn": "甘油三酯" },
+        { "name_cn": "总胆固醇" },
+        { "name_cn": "低密度脂蛋白胆固醇" },
+        { "name_cn": "高密度脂蛋白胆固醇" },
+        { "name_cn": "心电图" },
+        { "name_cn": "高敏肌钙蛋白" },
+        { "name_cn": "超声心动图" },
+        { "name_cn": "冠状动脉CT" },
+        { "name_cn": "运动心电图" },
+        { "name_cn": "脉搏波速度" }
+      ]
+    },
+    {
+      "name": "脑卒中筛查",
+      "description": "脑血管病筛查",
+      "members": [
+        { "name_cn": "血压" },
+        { "name_cn": "空腹血糖" },
+        { "name_cn": "总胆固醇" },
+        { "name_cn": "甘油三酯" },
+        { "name_cn": "低密度脂蛋白胆固醇" },
+        { "name_cn": "高密度脂蛋白胆固醇" },
+        { "name_cn": "颈动脉超声" },
+        { "name_cn": "颈动脉CTA" },
+        { "name_cn": "颅脑CT" },
+        { "name_cn": "颅脑MRI" },
+        { "name_cn": "同型半胱氨酸" },
+        { "name_cn": "踝肱指数" },
+        { "name_cn": "脉搏波速度" }
+      ]
+    },
+    {
+      "name": "其他血管性疾病筛查",
+      "description": "外周与动脉僵硬等",
+      "members": [
+        { "name_cn": "踝肱指数" },
+        { "name_cn": "颈动脉超声" },
+        { "name_cn": "脉搏波速度" }
+      ]
+    },
+    {
+      "name": "癌症筛查",
+      "description": "通用肿瘤标志与影像",
+      "members": [
+        { "name_cn": "便隐血" },
+        { "name_cn": "肺癌相关标志物" },
+        { "name_cn": "多靶向粪便FIT-DNA" },
+        { "name_cn": "结肠镜检查" }
+      ]
+    },
+    {
+      "name": "肺癌筛查",
+      "description": "肺癌相关筛查",
+      "members": [
+        { "name_cn": "胸部低剂量螺旋CT" },
+        { "name_cn": "肺癌相关标志物" }
+      ]
+    },
+    {
+      "name": "结直肠癌筛查",
+      "description": "结直肠癌相关筛查",
+      "members": [
+        { "name_cn": "直肠指检" },
+        { "name_cn": "便隐血" },
+        { "name_cn": "多靶向粪便FIT-DNA" },
+        { "name_cn": "结肠镜检查" }
+      ]
+    },
+    {
+      "name": "肝病筛查",
+      "description": "肝病综合筛查",
+      "members": [
+        { "name_cn": "肝脏B超" },
+        { "name_cn": "HBV-DNA定量" },
+        { "name_cn": "HCV-RNA定量" },
+        { "name_cn": "肝脏瞬时弹性成像" },
+        { "name_cn": "谷氨酰转移酶" },
+        { "name_cn": "碱性磷酸酶" },
+        { "name_cn": "血清细胞角蛋白18" },
+        { "name_cn": "肝脏CT" },
+        { "name_cn": "肝脏MRI" },
+        { "name_cn": "丙氨酸氨基转移酶" },
+        { "name_cn": "天门冬氨酸氨基转移酶" },
+        { "name_cn": "总胆红素" },
+        { "name_cn": "白蛋白" },
+        { "name_cn": "总蛋白" }
+      ]
+    },
+    {
+      "name": "病毒性肝炎筛查",
+      "description": "HBV/HCV相关",
+      "members": [
+        { "name_cn": "HBV-DNA定量" },
+        { "name_cn": "HCV-RNA定量" }
+      ]
+    },
+    {
+      "name": "脂肪性肝病筛查",
+      "description": "NAFLD相关",
+      "members": [
+        { "name_cn": "肝脏B超" },
+        { "name_cn": "肝脏瞬时弹性成像" },
+        { "name_cn": "肝脏CT" },
+        { "name_cn": "肝脏MRI" },
+        { "name_cn": "空腹血糖" },
+        { "name_cn": "总胆固醇" },
+        { "name_cn": "甘油三酯" },
+        { "name_cn": "低密度脂蛋白胆固醇" },
+        { "name_cn": "高密度脂蛋白胆固醇" },
+        { "name_cn": "尿酸" }
+      ]
+    },
+    {
+      "name": "肥胖筛查",
+      "description": "肥胖与代谢综合评估",
+      "members": [
+        { "name_cn": "身高" },
+        { "name_cn": "体重" },
+        { "name_cn": "腰围" },
+        { "name_cn": "体质指数" },
+        { "name_cn": "血压" },
+        { "name_cn": "空腹血糖" },
+        { "name_cn": "糖化血红蛋白" },
+        { "name_cn": "餐后2小时血糖" },
+        { "name_cn": "胰岛素(空腹)" },
+        { "name_cn": "胰岛素(餐后2h)" },
+        { "name_cn": "人体成分分析" },
+        { "name_cn": "内脏脂肪检测" },
+        { "name_cn": "总胆固醇" },
+        { "name_cn": "甘油三酯" },
+        { "name_cn": "低密度脂蛋白胆固醇" },
+        { "name_cn": "高密度脂蛋白胆固醇" },
+        { "name_cn": "促甲状腺刺激素" }
+      ]
+    }
+  ]
+}

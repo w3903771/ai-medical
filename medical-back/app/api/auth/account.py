@@ -54,7 +54,7 @@ async def update_profile(
     if data.email and data.email != (current_user.email or None):
         # 检查邮箱唯一
         exists = await session.exec(select(User).where(User.email == data.email))
-        if exists.scalar_one_or_none():
+        if exists.first():
             raise HTTPException(status_code=400, detail="邮箱已被使用")
         current_user.email = data.email
         changed = True

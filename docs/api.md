@@ -186,7 +186,7 @@ ${request_example}
 ```json
 {
   "items": [
-    { "id": 101, "indicator": "血压", "value": 120, "unit": "mmHg", "referenceRange": "90-140", "status": "normal|high|low", "measureDate": "YYYY-MM-DD", "category": "血压", "source": "manual|ocr|import", "note": "", "isBuiltin": true, "code": "BP_SYS", "favorite": true }
+    { "id": 101, "indicator": "血压", "type": "numeric", "value": "120", "unit": "mmHg", "referenceRange": "90-140", "status": "normal|high|low", "measureDate": "YYYY-MM-DD", "categories": ["血压"], "source": "manual|ocr|import", "note": "", "isBuiltin": true, "code": "BP_SYS", "favorite": true }
   ],
   "total": 123
 }
@@ -197,7 +197,7 @@ ${request_example}
 - Prefix：`/api/v1`
 - Endpoint：`/indicators`
 - Method：`POST`
-- Request（Body）：`{ "indicator": "血压", "unit": "mmHg", "referenceMin": 90, "referenceMax": 140, "category": "血压", "introductionText": "", "measurementMethod": "", "code": null }`
+- Request（Body）：`{ "indicator": "血压", "type": "numeric|text", "unit": "mmHg", "referenceMin": 90, "referenceMax": 140, "categories": ["血压"], "introductionText": "", "measurementMethod": "", "code": null }`
 - Response（Body）：`{ "id": 101 }`
 - Notes：校验 `referenceMin <= referenceMax`；普通用户创建为“自定义指标”，后端自动记录归属用户；`code` 仅用于管理员创建“内置指标”（可选）。
 
@@ -205,8 +205,8 @@ ${request_example}
 - Prefix：`/api/v1`
 - Endpoint：`/indicators/{id}`
 - Method：`GET`
-- Response（Body）：`{ "id": 101, "indicator": "血压", "unit": "mmHg", "referenceMin": 90, "referenceMax": 140, "category": "血压" }`
-- Notes：用于编辑与详情
+- Response（Body）：`{ "id": 101, "indicator": "血压", "type": "numeric|text", "unit": "mmHg", "referenceMin": 90, "referenceMax": 140, "categories": ["血压","心血管"] }`
+- Notes：支持多分类返回；筛选时可用 `category=血压` 过滤包含该分类的指标；用于编辑与详情
 
 ### 更新指标定义（Update Indicator）
 - Prefix：`/api/v1`
@@ -236,7 +236,7 @@ ${request_example}
 ```json
 {
   "items": [
-    { "recordId": 888, "date": "YYYY-MM-DD", "value": 118, "unit": "mmHg", "status": "normal|high|low", "source": "manual|ocr|import", "note": "", "admissionFileId": "f-1" }
+    { "recordId": 888, "date": "YYYY-MM-DD", "value": "118", "unit": "mmHg", "status": "normal|high|low", "source": "manual|ocr|import", "note": "", "admissionFileId": "f-1" }
   ],
   "total": 200
 }
@@ -247,7 +247,7 @@ ${request_example}
 - Prefix：`/api/v1`
 - Endpoint：`/indicators/{id}/records`
 - Method：`POST`
-- Request（Body）：`{ "date":"YYYY-MM-DD", "value":118, "unit":"mmHg", "referenceMin":90, "referenceMax":140, "source":"manual", "note":"", "admissionFileId": "f-1" }`
+- Request（Body）：`{ "date":"YYYY-MM-DD", "value":"118"|"阴性", "unit":"mmHg", "referenceMin":90, "referenceMax":140, "source":"manual", "note":"", "admissionFileId": "f-1" }`
 - Response（Body）：`{ "recordId": 888 }`
 - Notes：校验日期与参考值范围；若携带 `admissionFileId`，需与当前用户一致并存在于住院文件中。
 
@@ -417,7 +417,7 @@ ${request_example}
 ```json
 {
   "items": [
-    { "recordId": 888, "indicatorId": 101, "date": "YYYY-MM-DD", "value": 118, "unit": "mmHg", "status": "normal|high|low", "source": "ocr", "note": "", "admissionFileId": "f-1" }
+    { "recordId": 888, "indicatorId": 101, "date": "YYYY-MM-DD", "value": "118", "unit": "mmHg", "status": "normal|high|low", "source": "ocr", "note": "", "admissionFileId": "f-1" }
   ],
   "total": 200
 }
@@ -616,6 +616,7 @@ curl "http://<host>/api/v1/indicators?page=1&pageSize=20&keyword=血&category=�
 ```js
 axios.get('/api/v1/indicators',{ params:{ page:1, pageSize:20, keyword:'血', category:'血压' }})
 ```
+- Notes：`category` 参数按成员归属过滤（多对多）
 
 ### 获取我关注的指标（Favorites）
 ```bash

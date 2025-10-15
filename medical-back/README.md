@@ -67,6 +67,13 @@ SQLITE_URL=sqlite+aiosqlite:///./medical.sqlite3
 - Windows 下建议使用绝对路径并保留驱动前缀（例如 `sqlite+aiosqlite`）。
 - 首次启动后端会自动建表；若后续更换数据库类型或字段结构，请先清理旧库或使用迁移工具。
 
+### 种子数据（内置字典）
+- 后端启动后会执行种子导入：
+  - 指标定义来自 `app/data/indicators.json`
+  - 分类定义来自 `app/data/category.json`
+- 若 `category.json` 缺失，仍兼容旧版结构（从 `indicators.json` 的 `categories` 读取）。
+- 导入幂等：重复启动只会更新字段，不会产生重复记录。
+
 ## 目录结构
 - `app/core`：应用设置、日志、请求上下文中间件
 - `app/utils`：请求上下文变量（`request_id`、`trace_id`）
@@ -82,6 +89,10 @@ SQLITE_URL=sqlite+aiosqlite:///./medical.sqlite3
   - 基本字段：`username`、`password_hash`、`email`、`role`、`last_login`
   - 通用字段：`id`、`created_at`、`updated_at`、`deleted_at`
 - 指标：`Indicator`
+  - 基础字段：`name_cn`、`name_en`、`unit`、`reference_min`、`reference_max`、`is_builtin`、`loinc`
+  - 关联关系：`categories`（多对多，联结表 `IndicatorCategoryLink`），`records`，`detail`
+  - `loinc` 字段：LOINC编码（唯一，可选），用于标准化医疗指标编码，便于与外部系统对接。
+  - 说明：分类成员来源于 `category.json` 的 `categories[*].members`（如使用），自动建立关联；未配置成员时可在后续接口或脚本中维护。
   - 指标基础信息（中文名、英文名、单位、分类、参考范围等），支持软删除与时间戳。
 - 指标记录：`IndicatorRecord`
   - 指标值的逐次记录（测量时间、数值、单位、参考范围、来源、备注），可关联住院文件。

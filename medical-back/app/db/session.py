@@ -4,7 +4,8 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
 from app.core.settings import get_settings
-from app.models.indicator import Indicator, IndicatorRecord, Category, IndicatorDetail
+# import 行（引入联结表，确保建表）
+from app.models.indicator import Indicator, IndicatorRecord, Category, IndicatorDetail, IndicatorCategoryLink
 from app.models.admission import AdmissionFolder, Admission, AdmissionFile
 from app.models.medication import Medication, MedicationRecord
 from app.models.user import User
@@ -27,6 +28,11 @@ async_session_factory = sessionmaker(
 async def init_db() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
+    try:
+        from app.db.seeds import run_seeds
+        await run_seeds()
+    except Exception:
+        pass
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:

@@ -1,4 +1,4 @@
-from datetime import datetime, date
+import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -48,14 +48,14 @@ async def register(data: RegisterRequest, session: AsyncSession = Depends(get_se
         raise HTTPException(status_code=400, detail="用户名与密码必填")
 
     # 检查用户名唯一性
-    existing = await session.exec(select(User).where(User.username == data.username))
-    if existing.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="用户名已存在")
-
+    if data.username:
+        existing = await session.exec(select(User).where(User.username == data.username))
+        if existing.first():
+            raise HTTPException(status_code=400, detail="用户名已存在")
     # 检查邮箱唯一性
     if data.email:
         existing_email = await session.exec(select(User).where(User.email == data.email))
-        if existing_email.scalar_one_or_none():
+        if existing_email.first():
             raise HTTPException(status_code=400, detail="邮箱已被使用")
 
     user = User(
@@ -92,14 +92,14 @@ class LoginRequest(BaseModel):
 @router.post("/login")
 async def login(data: LoginRequest, session: AsyncSession = Depends(get_session)):
     result = await session.exec(select(User).where(User.username == data.username, User.deleted_at.is_(None)))
-    user = result.scalar_one_or_none()
+    user = result.first()
     if not user:
         raise HTTPException(status_code=401, detail="用户不存在")
 
     if _hash_password(data.password) != user.password_hash:
         raise HTTPException(status_code=401, detail="密码错误")
 
-    user.last_login = datetime.now(datetime.timezone.utc)
+    user.last_login = datetime.datetime.now(datetime.timezone.utc)
     await session.commit()
 
     token = create_jwt_token(user_id=user.id, expire_minutes=10)

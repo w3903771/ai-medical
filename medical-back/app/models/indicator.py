@@ -8,28 +8,38 @@ from .base import IDMixin, TimestampMixin, SoftDeleteMixin
 # 指标分类与指标模型
 
 
+# class Category（修改关系为多对多）
 class Category(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
     name: str = Field(index=True, unique=True, nullable=False)  # 分类名称（唯一）
     description: Optional[str] = None  # 分类描述
 
-    indicators: list["Indicator"] = Relationship(back_populates="category")
+    indicators: list["Indicator"] = Relationship(
+        back_populates="categories",
+        link_model=IndicatorCategoryLink
+    )
 
+# class Indicator（移除 category_id 与单向关系，改为多对多）
 class Indicator(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
     __table_args__ = (
         UniqueConstraint("owner_user_id", "name_cn"),
+        UniqueConstraint("loinc"),
+        Index("idx_indicator_loinc", "loinc"),
     )
-    owner_user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)  # 指标所有者用户ID
-    name_cn: str = Field(index=True)  # 指标中文名
-    name_en: Optional[str] = Field(default=None, index=True)  # 指标英文名（可选）
-    unit: str = Field(index=False, nullable=False)  # 单位（必填）
-    category_id: Optional[int] = Field(default=None, foreign_key="category.id", index=True)  # 分类外键
-    reference_min: Optional[float] = Field(default=None)  # 参考下限
-    reference_max: Optional[float] = Field(default=None)  # 参考上限
-    is_builtin: bool = Field(default=False, index=True)  # 是否内置指标
-    
+    owner_user_id: Optional[int] = Field(default=None, foreign_key="user.id", index=True)
+    name_cn: str = Field(index=True)
+    name_en: Optional[str] = Field(default=None, index=True)
+    unit: str = Field(index=False, nullable=False)
+    type: str = Field(default="numeric", index=True, description="指标类型：numeric|text")
+    reference_min: Optional[float] = Field(default=None)
+    reference_max: Optional[float] = Field(default=None)
+    is_builtin: bool = Field(default=False, index=True)
+    loinc: Optional[str] = Field(default=None, index=True, unique=True, description="LOINC编码（唯一，可选）")
     records: Mapped[list["IndicatorRecord"]] = Relationship(back_populates="indicator")
     detail: Mapped[Optional["IndicatorDetail"]] = Relationship(back_populates="indicator", sa_relationship_kwargs={"uselist": False})
-    category: Mapped[Optional["Category"]] = Relationship(back_populates="indicators")
+    categories: list["Category"] = Relationship(
+        back_populates="indicators",
+        link_model=IndicatorCategoryLink
+    )
 
 class IndicatorRecord(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
     __table_args__ = (
@@ -41,7 +51,7 @@ class IndicatorRecord(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=
     indicator_id: int = Field(foreign_key="indicator.id", index=True, nullable=False)  # 指标ID
     user_id: int = Field(foreign_key="user.id", index=True, nullable=False)  # 用户ID
     measured_at: date = Field(index=True, nullable=False)  # 测量日期
-    value: float = Field(index=False, nullable=False)  # 指标值
+    value: str = Field(index=False, nullable=False)  # 指标值（字符串，兼容文本与数值）
     unit: str = Field(index=False, nullable=False)  # 单位（必填，避免跨表默认引用）
     ref_low: Optional[float] = Field(default=None, index=False)  # 参考下限（记录级覆盖）
     ref_high: Optional[float] = Field(default=None, index=False)  # 参考上限（记录级覆盖）
@@ -68,3 +78,9 @@ class IndicatorDetail(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=
     updated_at: Optional[datetime] = Field(default_factory=datetime.now, index=True, nullable=False)
 
     indicator: Mapped["Indicator"] = Relationship(back_populates="detail")
+
+
+# class IndicatorCategoryLink（新增，多对多联结表）
+class IndicatorCategoryLink(SQLModel, table=True):
+    indicator_id: int = Field(foreign_key="indicator.id", primary_key=True)
+    category_id: int = Field(foreign_key="category.id", primary_key=True)
