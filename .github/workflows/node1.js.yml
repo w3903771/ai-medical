@@ -13,6 +13,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    defaults:
+       run:
+         working-directory: ./medical-front/
 
     strategy:
       matrix:
@@ -24,7 +27,7 @@ jobs:
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
-        cache-dependency-path: medical-front/package-lock.json
+        cache-dependency-path: ./medical-front/package-lock.json
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
