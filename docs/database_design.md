@@ -86,15 +86,15 @@ SystemLog（系统级独立）
 
 索引：
 - idx_indicator_owner (owner_user_id)
+- idx_indicator_name_cn (name_cn)
+- idx_indicator_name_en (name_en)
+- idx_indicator_type (unit)
+- idx_indicator_is_builtin (is_builtin)
 - idx_indicator_loinc (loinc)
 
 唯一约束（建议）：
 - unique(owner_user_id, name_cn)  // 用户自定义
 - unique(loinc)  // 内置指标 LOINC 码全局唯一
-指标在用户域内唯一：
-- 自定义指标：`owner_user_id` + `name_cn` 唯一
-- 内置指标：`loinc` 唯一
-
 
 接口映射：
 - `/api/v1/indicators` 列表：支持查询内置与自定义；“我关注的”需联表 `UserIndicator`。
@@ -114,19 +114,19 @@ SystemLog（系统级独立）
 - 用户侧筛选通过 `UserIndicator.favorite` 实现“我关注的指标”。
  
 关系说明：
-- 分类与指标改为多对多，通过联结表 `IndicatorCategoryLink` 维护；详见下文“指标与分类（多对多）”与“种子数据与数据文件”。
+- 分类与指标为多对多，通过联结表 `IndicatorCategoryLink` 维护；详见下文“种子数据与数据文件”。
 
 ### IndicatorRecord（指标记录）
 - id: integer, PK, auto
 - indicator_id: integer, FK → Indicator.id, not null
 - user_id: integer, FK → User.id, not null
 - measured_at: date, not null
-- value: numeric(12,4), not null
+- value: varchar(255), not null
 - unit: varchar(32), not null
 - ref_low: numeric(12,4), null
 - ref_high: numeric(12,4), null
 - ref_text: varchar(255), null
-- source: varchar(32), not null  // manual|ocr|import
+- source: varchar(32), null  // manual|ocr|import
 - note: varchar(255), null
 - admission_file_id: integer, FK → AdmissionFile.id, null  // 可选关联：记录来源文件
 - created_at: datetime, not null
@@ -136,7 +136,7 @@ SystemLog（系统级独立）
 - idx_indicatorrecord_indicator_measured (indicator_id, measured_at)
 - idx_indicatorrecord_user_measured (user_id, measured_at)
 - idx_indicatorrecord_file (admission_file_id)
-- 可选唯一约束：同一用户同一指标在同一天仅一条固定来源记录 → unique(user_id, indicator_id, measured_at, source)
+
 一致性：
 - 写入校验 `IndicatorRecord.user_id == AdmissionFile.user_id`（若 `admission_file_id` 非空）。
 
@@ -153,163 +153,17 @@ SystemLog（系统级独立）
 - threshold_max: numeric(12,4), null
 - favorite: boolean, not null, default false
 - created_at: datetime, not null
+- deleted_at: datetime, null
 
 索引与约束：
 - unique(user_id, indicator_id)
 - idx_userindicator_user (user_id)
+- idx_userindicator_favorite (favorite)
 - idx_userindicator_user_favorite (user_id, favorite)
 
-接口映射：
-- `/api/v1/user-indicators`：关注、取消关注与个性化配置；列表按照 `user_id` 过滤。
-
-### IndicatorDetail（指标知识与建议，1:1）
-- id: integer, PK, auto
-- indicator_id: integer, FK → Indicator.id, unique, not null
-- introduction_text: text, null
-- measurement_method: text, null
-- clinical_significance: text, null
-- high_meaning: text, null
-- low_meaning: text, null
-- high_advice: text, null
-- low_advice: text, null
-- normal_advice: text, null
-- general_advice: text, null
-- unit: varchar(32), null
-- reference_range: varchar(64), null  // 展示用；计算仍以记录的 ref_low/ref_high
-- updated_at: datetime, not null
 
 接口映射：
-- GET `/api/v1/indicators/{id}/detail`
-- PUT `/api/v1/indicators/{id}/detail`
-
----
-
-## 指标分析
-
-（分析为计算结果，通常不入库；如需缓存可用临时表或缓存键）
-
-### IndicatorStatsCache（可选）
-- id: integer, PK, auto
-- indicator_id: integer, FK → Indicator.id
-- window: varchar(16)  // day|week|month|custom
-- mean: numeric(12,4)
-- std: numeric(12,4)
-- trend_slope: numeric(12,6)
-- abnormal_count: integer
-- updated_at: datetime
-
-索引：
-- unique(indicator_id, window)
-
----
-
-## 住院管理模块
-
-### AdmissionFolder（年月分组）
-- id: integer, PK, auto
-- user_id: integer, FK → User.id, not null
-- year: integer, not null
-- month: integer, not null  // 1-12
-
-索引：
-- unique(user_id, year, month)
-
-### Admission（住院记录）
-- id: integer, PK, auto
-- folder_id: integer, FK → AdmissionFolder.id, not null
-- user_id: integer, FK → User.id, not null
-- hospital: varchar(128), not null
-- department: varchar(64), null
-- diagnosis: varchar(255), null
-- admission_date: date, null
-- discharge_date: date, null
-- tags_json: text, null  // JSON 字符串
-- notes: text, null
-- created_at: datetime, not null
-- deleted_at: datetime, null
-
-索引：
-- idx_admission_folder (folder_id)
-- idx_admission_user (user_id)
-- idx_admission_hospital (hospital)
-- idx_admission_user_dates (user_id, admission_date, discharge_date)
-
-### AdmissionFile（文件项）
-- id: integer, PK, auto
-- admission_id: integer, FK → Admission.id, not null
-- user_id: integer, FK → User.id, not null
-- filename: varchar(255), not null
-- oss_key: varchar(255), null  // 云存储 Key（如使用 OSS/S3）
-- url: varchar(255), null  // 文件访问 URL
-- pages: integer, null
-- ocr_done: boolean, not null, default false
-- extracted_text: text, null
-- meta_json: text, null
-- uploaded_at: datetime, not null
-- deleted_at: datetime, null
-
-索引：
-- idx_admissionfile_admission (admission_id)
-- idx_admissionfile_user_uploaded (user_id, uploaded_at)
- # 指标与分类（多对多）
- 
- - Category（分类）：`id`, `name(唯一)`, `description`, 时间戳/软删除
- - Indicator（指标）：`id`, `owner_user_id(内置为 null)`, `name_cn`, `name_en`, `unit`, `type(numeric|text)`, `reference_min`, `reference_max`, `is_builtin`, `loinc(唯一, 可选)`
- - IndicatorCategoryLink（联结表）：`indicator_id`, `category_id`（联合主键）
- - 关系：
-    - `Category.indicators` ↔ `Indicator.categories` 通过 `IndicatorCategoryLink` 多对多关联
-    - `IndicatorRecord` 与 `IndicatorDetail` 与原设计一致
-
-### 种子数据与数据文件
-- 指标数据文件：`medical-back/app/data/indicators.json`
-  - 主要键：`dataset_version`, `generated_at`, `indicators: [...]`
-  - 指标项包含：`name_cn`, `name_en`, `unit`, `type(numeric|text)`, `reference_min`, `reference_max`, `loinc`, `detail{...}`
-  - 说明：`type` 可选；若缺省，种子脚本将按 `unit` 推断（`qualitative|N/A` → `text`，其余 → `numeric`）。
-- 分类数据文件：`medical-back/app/data/category.json`
-  - 主要键：`dataset_version`, `generated_at`, `categories: [...]`
-  - 分类项包含：`name`, `description`, `members`（分类成员）
-    - `members` 支持三种引用方式，用于建立多对多关联：
-      - 直接字符串：按 `loinc` 识别（推荐）
-      - 对象 `{ loinc: "..." }`
-      - 对象 `{ name_cn: "..." }`（兜底，适用于无 LOINC 的内置指标）
-
-种子流程（应用启动自动执行）：
-- 读取 `indicators.json`（必需）并 upsert 指标与 `IndicatorDetail`。
-- 若存在 `category.json`，从中读取并 upsert 分类；否则兼容旧版，从 `indicators.json.categories` 读取。
-- 根据 `categories[*].members` 建立 `IndicatorCategoryLink` 多对多关联；过程幂等，重复执行不会产生重复链接。
-- 指标 upsert 不再处理单值 `category` 字段；分类关联通过 `IndicatorCategoryLink` 维护。
-- 记录系统日志：`SystemLog.message = "seed_builtins:ind=<ind>;cat=<cat>"`，并在 `context_json` 中写入计数 `{ categories, indicators }`。
-
-数据维护建议：
-- 仅维护 `category.json` 的 `members` 列表可实现分类成员维护；后端根据 `loinc`/`name_cn` 自动建立关联。
-- 若需快速重置数据，可删除 SQLite 文件（开发环境）；生产环境请使用迁移脚本保留业务数据。
-
-- idx_indicatorrecord_file (admission_file_id)
-- 可选唯一约束：同一用户同一指标在同一天仅一条固定来源记录 → unique(user_id, indicator_id, measured_at, source)
-一致性：
-- 写入校验 `IndicatorRecord.user_id == AdmissionFile.user_id`（若 `admission_file_id` 非空）。
-
-接口映射：
-- `/api/v1/indicators/{id}/records` → `date(measured_at)`, `value(text)`, `unit`, `status(仅 numeric 类型按 value 与 ref_low/ref_high 计算；text 类型不计算)`。
-- `/api/v1/admissions/{admissionId}/files/{fileId}/indicator-records` → 通过 `admission_file_id` 过滤记录。
-
-### UserIndicator（用户-指标关联与个性化，N-N）
-- id: integer, PK, auto
-- user_id: integer, FK → User.id, not null
-- indicator_id: integer, FK → Indicator.id, not null
-- alias: varchar(128), null
-- threshold_min: numeric(12,4), null
-- threshold_max: numeric(12,4), null
-- favorite: boolean, not null, default false
-- created_at: datetime, not null
-
-索引与约束：
-- unique(user_id, indicator_id)
-- idx_userindicator_user (user_id)
-- idx_userindicator_user_favorite (user_id, favorite)
-
-接口映射：
-- `/api/v1/user-indicators`：关注、取消关注与个性化配置；列表按照 `user_id` 过滤。
+- `/api/v1/user-indicators`：关注、取消关注与个性化配置；列表按照`user_id` 过滤。
 
 ### IndicatorDetail（指标知识与建议，1:1）
 - id: integer, PK, auto
@@ -401,8 +255,6 @@ SystemLog（系统级独立）
 - idx_admissionfile_admission (admission_id)
 - idx_admissionfile_user_uploaded (user_id, uploaded_at)
  -（与指标记录联动）建议为 `indicator_record.admission_file_id` 创建索引 `idx_indicatorrecord_file`，支持按文件反查记录。
-
----
 
 ## 用药管理模块
 
@@ -580,15 +432,36 @@ SystemLog（系统级独立）
 
 ---
 
-## 关系图（文字说明）
-- User ——< Indicator ——< IndicatorRecord
-- Indicator ——1 IndicatorDetail
-- User ——< AdmissionFolder ——< Admission ——< AdmissionFile ——< OcrTask
-- KnowledgeDoc ——< KnowledgeChunk
-- User ——< ChatSession ——< ChatMessage
-- User ——< AuditLog；User ——< ChatSession（可选）
-- User ——< ExportTask；User ——< WebSearchQuery
-- SystemLog、ModelProviderStatus 独立（系统级）
+---
+
+## 种子数据与数据文件
+- 指标数据文件：`medical-back/app/data/indicators.json`
+  - 主要键：`dataset_version`, `generated_at`, `indicators: [...]`
+  - 指标项包含：`name_cn`, `name_en`, `unit`, `type(numeric|text)`, `reference_min`, `reference_max`, `loinc`, `detail{...}`
+  - 说明：`type` 可选；若缺省，种子脚本将按 `unit` 推断（`qualitative|N/A` → `text`，其余 → `numeric`）。
+- 分类数据文件：`medical-back/app/data/category.json`
+  - 主要键：`dataset_version`, `generated_at`, `categories: [...]`
+  - 分类项包含：`name`, `description`, `members`（分类成员）
+    - `members` 支持三种引用方式，用于建立多对多关联：
+      - 直接字符串：按 `loinc` 识别（推荐）
+      - 对象 `{ loinc: "..." }`
+      - 对象 `{ name_cn: "..." }`（兜底，适用于无 LOINC 的内置指标）
+
+种子流程（应用启动自动执行）：
+- 读取 `indicators.json`（必需）并 upsert 指标与 `IndicatorDetail`。
+- 若存在 `category.json`，从中读取并 upsert 分类；否则兼容旧版，从 `indicators.json.categories` 读取。
+- 根据 `categories[*].members` 建立 `IndicatorCategoryLink` 多对多关联；过程幂等，重复执行不会产生重复链接。
+- 指标 upsert 不再处理单值 `category` 字段；分类关联通过 `IndicatorCategoryLink` 维护。
+- 记录系统日志：`SystemLog.message = "seed_builtins:ind=<ind>;cat=<cat>"`，并在 `context_json` 中写入计数 `{ categories, indicators }`。
+
+数据维护建议：
+- 仅维护 `category.json` 的 `members` 列表可实现分类成员维护；后端根据 `loinc`/`name_cn` 自动建立关联。
+- 若需快速重置数据，可删除 SQLite 文件（开发环境）；生产环境请使用迁移脚本保留业务数据。
+
+- idx_indicatorrecord_file (admission_file_id)
+- 可选唯一约束：同一用户同一指标在同一天仅一条固定来源记录 → unique(user_id, indicator_id, measured_at, source)
+一致性：
+- 写入校验 `IndicatorRecord.user_id == AdmissionFile.user_id`（若 `admission_file_id` 非空）。
 
 ---
 

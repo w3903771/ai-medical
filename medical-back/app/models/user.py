@@ -15,3 +15,5 @@ class User(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
     birth_date: Optional[date] = Field(default=None)  # 生日（YYYY-MM-DD）
     gender: Optional[int] = Field(default=None, index=True)  # 性别 0/1 男/女
     last_login: Optional[datetime] = Field(default=None)  # 最近登录时间
+
+    indicators: list["Indicator"] = Relationship(back_populates="users", link_model=UserIndicator)
