@@ -4,8 +4,16 @@ from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy.orm import Mapped
 from sqlalchemy import UniqueConstraint, Index
 from .base import IDMixin, TimestampMixin, SoftDeleteMixin
+from .user_indicator import UserIndicator
 
 # 指标分类与指标模型
+class IndicatorCategoryLink(SQLModel, table=True):
+    __table_args__ = (
+        UniqueConstraint("indicator_id", "category_id"),
+    )
+
+    indicator_id: int = Field(foreign_key="indicator.id", primary_key=True, index=True)
+    category_id: int = Field(foreign_key="category.id", primary_key=True, index=True)
 
 
 class Category(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=True):
@@ -82,12 +90,3 @@ class IndicatorDetail(IDMixin, TimestampMixin, SoftDeleteMixin, SQLModel, table=
     updated_at: Optional[datetime] = Field(default_factory=datetime.now, index=True, nullable=False)
 
     indicator: Mapped["Indicator"] = Relationship(back_populates="detail")
-
-
-class IndicatorCategoryLink(SQLModel, table=True):
-    __table_args__ = (
-        UniqueConstraint("indicator_id", "category_id"),
-    )
-
-    indicator_id: int = Field(foreign_key="indicator.id", primary_key=True, index=True)
-    category_id: int = Field(foreign_key="category.id", primary_key=True, index=True)

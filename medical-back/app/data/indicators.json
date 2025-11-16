@@ -1,11 +1,14 @@
 {
-  "dataset_version": "v1.1.0",
+  "dataset_version": "v0.0.1",
   "generated_at": "2025-10-15",
   "indicators": [
     {
       "name_cn": "血红蛋白",
       "name_en": "Hemoglobin",
       "unit": "g/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "reference_min": 110,
       "reference_max": 160,
       "loinc": "718-7",
@@ -19,6 +22,9 @@
       "name_cn": "丙氨酸氨基转移酶",
       "name_en": "ALT",
       "unit": "U/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "reference_min": 0,
       "reference_max": 40,
       "loinc": "1742-6",
@@ -31,6 +37,9 @@
       "name_cn": "白细胞计数",
       "name_en": "WBC",
       "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "感染、炎症与血液系统疾病筛查"
       }
@@ -39,6 +48,9 @@
       "name_cn": "红细胞计数",
       "name_en": "RBC",
       "unit": "10^12/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "贫血与红细胞相关疾病评估"
       }
@@ -47,6 +59,9 @@
       "name_cn": "血小板计数",
       "name_en": "Platelet",
       "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "出血风险与凝血功能评估"
       }
@@ -54,6 +69,9 @@
     {
       "name_cn": "尿蛋白",
       "unit": "qualitative",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "肾小球/肾小管损伤筛查"
       }
@@ -61,6 +79,9 @@
     {
       "name_cn": "尿潜血",
       "unit": "qualitative",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "泌尿系统出血或炎症提示"
       }
@@ -68,6 +89,9 @@
     {
       "name_cn": "尿红细胞",
       "unit": "cells/HPF",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "泌尿系统炎症或出血评估"
       }
@@ -75,6 +99,9 @@
     {
       "name_cn": "尿白细胞",
       "unit": "cells/HPF",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "泌尿系统感染提示"
       }
@@ -82,6 +109,9 @@
     {
       "name_cn": "尿比重",
       "unit": "ratio",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "肾浓缩功能与水分状态评估"
       }
@@ -89,6 +119,9 @@
     {
       "name_cn": "亚硝酸盐(尿)",
       "unit": "qualitative",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "泌尿系统细菌感染筛查"
       }
@@ -96,6 +129,9 @@
     {
       "name_cn": "便常规",
       "unit": "qualitative",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "消化道基本检查"
       }
@@ -103,6 +139,9 @@
     {
       "name_cn": "便隐血",
       "unit": "qualitative",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "消化道出血筛查，结直肠癌筛查基础项目"
       }
@@ -111,6 +150,9 @@
       "name_cn": "天门冬氨酸氨基转移酶",
       "name_en": "AST",
       "unit": "U/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "肝细胞损伤相关指标"
       }
@@ -119,6 +161,9 @@
       "name_cn": "总胆红素",
       "name_en": "Total Bilirubin",
       "unit": "umol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "肝功能与胆红素代谢评估"
       }
@@ -127,6 +172,9 @@
       "name_cn": "直接胆红素",
       "name_en": "Direct Bilirubin",
       "unit": "umol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "胆汁淤积等评估"
       }
@@ -135,6 +183,9 @@
       "name_cn": "间接胆红素",
       "name_en": "Indirect Bilirubin",
       "unit": "umol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "溶血与肝功能评估"
       }
@@ -143,6 +194,9 @@
       "name_cn": "总蛋白",
       "name_en": "Total Protein",
       "unit": "g/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "营养状态与肝合成功能评估"
       }
@@ -151,6 +205,9 @@
       "name_cn": "白蛋白",
       "name_en": "Albumin",
       "unit": "g/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "营养与肝合成功能评估"
       }
@@ -159,6 +216,9 @@
       "name_cn": "球蛋白",
       "name_en": "Globulin",
       "unit": "g/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "免疫相关蛋白水平评估"
       }
@@ -167,6 +227,9 @@
       "name_cn": "谷氨酰转移酶",
       "name_en": "GGT",
       "unit": "U/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "胆汁淤积与酒精相关肝损伤评估"
       }
@@ -175,6 +238,9 @@
       "name_cn": "碱性磷酸酶",
       "name_en": "ALP",
       "unit": "U/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "胆道阻塞与骨代谢相关"
       }
@@ -183,6 +249,9 @@
       "name_cn": "尿素氮",
       "name_en": "BUN",
       "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "肾功能评估"
       }
@@ -191,6 +260,9 @@
       "name_cn": "肌酐",
       "name_en": "Creatinine",
       "unit": "umol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "肾小球滤过功能评估"
       }
@@ -199,6 +271,9 @@
       "name_cn": "总胆固醇",
       "name_en": "TC",
       "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "心血管风险评估"
       }
@@ -207,6 +282,9 @@
       "name_cn": "甘油三酯",
       "name_en": "TG",
       "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "心血管风险评估"
       }
@@ -215,6 +293,9 @@
       "name_cn": "低密度脂蛋白胆固醇",
       "name_en": "LDL-C",
       "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "动脉粥样硬化风险评估"
       }
@@ -223,6 +304,9 @@
       "name_cn": "高密度脂蛋白胆固醇",
       "name_en": "HDL-C",
       "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "心血管保护相关"
       }
@@ -231,6 +315,9 @@
       "name_cn": "空腹血糖",
       "name_en": "FPG",
       "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "糖代谢评估"
       }
@@ -239,6 +326,9 @@
       "name_cn": "糖化血红蛋白",
       "name_en": "HbA1c",
       "unit": "%",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "长期血糖控制评估"
       }
@@ -247,6 +337,9 @@
       "name_cn": "餐后2小时血糖",
       "name_en": "PP2h",
       "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "糖耐量与胰岛功能评估"
       }
@@ -255,6 +348,9 @@
       "name_cn": "糖耐量试验",
       "name_en": "OGTT",
       "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "糖尿病诊断辅助"
       }
@@ -263,6 +359,9 @@
       "name_cn": "尿酸",
       "name_en": "Uric Acid",
       "unit": "umol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "痛风与代谢综合征风险评估"
       }
@@ -271,6 +370,9 @@
       "name_cn": "总甲状腺素",
       "name_en": "TT4",
       "unit": "nmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "甲状腺功能评估"
       }
@@ -279,6 +381,9 @@
       "name_cn": "游离甲状腺素",
       "name_en": "FT4",
       "unit": "pmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "甲状腺功能评估"
       }
@@ -287,6 +392,9 @@
       "name_cn": "促甲状腺刺激素",
       "name_en": "TSH",
       "unit": "uIU/mL",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "甲状腺轴调控评估"
       }
@@ -295,6 +403,9 @@
       "name_cn": "血压",
       "name_en": "Blood Pressure",
       "unit": "mmHg",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "高血压筛查与心血管风险评估"
       }
@@ -303,6 +414,9 @@
       "name_cn": "同型半胱氨酸",
       "name_en": "Homocysteine",
       "unit": "umol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "动脉粥样硬化与卒中风险评估"
       }
@@ -311,6 +425,9 @@
       "name_cn": "尿白蛋白/肌酐比值",
       "name_en": "UACR",
       "unit": "mg/g",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "早期肾损伤与心血管风险评估"
       }
@@ -318,6 +435,9 @@
     {
       "name_cn": "人体成分分析",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "肥胖评估与代谢风险"
       }
@@ -326,6 +446,9 @@
       "name_cn": "脉搏波速度",
       "name_en": "PWV",
       "unit": "m/s",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "动脉僵硬度评估"
       }
@@ -333,6 +456,9 @@
     {
       "name_cn": "颈动脉超声",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "动脉粥样硬化与斑块评估"
       }
@@ -340,6 +466,9 @@
     {
       "name_cn": "超声心动图",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "心脏结构与功能评估"
       }
@@ -347,6 +476,9 @@
     {
       "name_cn": "心电图",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "心律与缺血评估"
       }
@@ -354,6 +486,9 @@
     {
       "name_cn": "冠状动脉CT",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "冠心病筛查（无创）"
       }
@@ -361,6 +496,9 @@
     {
       "name_cn": "运动心电图",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "负荷性缺血评估"
       }
@@ -368,6 +506,9 @@
     {
       "name_cn": "眼底检查",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "微血管并发症与高血压目标器官损害评估"
       }
@@ -375,6 +516,9 @@
     {
       "name_cn": "肾脏超声",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "肾脏结构性异常评估"
       }
@@ -382,6 +526,9 @@
     {
       "name_cn": "胸部X线片",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "肺部与心胸评估（基础）"
       }
@@ -389,6 +536,9 @@
     {
       "name_cn": "24小时尿钠",
       "unit": "mmol/24h",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "钠摄入与血压管理评估"
       }
@@ -397,6 +547,9 @@
       "name_cn": "血钾",
       "name_en": "Serum Potassium",
       "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "电解质平衡与心律风险"
       }
@@ -405,6 +558,9 @@
       "name_cn": "血钠",
       "name_en": "Serum Sodium",
       "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "电解质与体液平衡评估"
       }
@@ -413,6 +569,9 @@
       "name_cn": "高敏肌钙蛋白",
       "name_en": "hs-cTn",
       "unit": "ng/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "心肌损伤敏感标志物"
       }
@@ -420,6 +579,9 @@
     {
       "name_cn": "颅脑CT",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "脑卒中急诊或筛查影像"
       }
@@ -427,6 +589,9 @@
     {
       "name_cn": "颅脑MRI",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "脑白质病变与卒中风险评估"
       }
@@ -434,6 +599,9 @@
     {
       "name_cn": "颈动脉CTA",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "动脉狭窄与斑块评估"
       }
@@ -442,6 +610,9 @@
       "name_cn": "踝肱指数",
       "name_en": "ABI",
       "unit": "ratio",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "外周动脉疾病筛查"
       }
@@ -450,6 +621,9 @@
       "name_cn": "胸部低剂量螺旋CT",
       "name_en": "LDCT",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "肺癌筛查优先推荐"
       }
@@ -457,6 +631,9 @@
     {
       "name_cn": "肺癌相关标志物",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "肺癌风险辅助评估（如NSE/CYFRA21-1等）"
       }
@@ -464,6 +641,9 @@
     {
       "name_cn": "直肠指检",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "结直肠癌基础筛查"
       }
@@ -471,6 +651,9 @@
     {
       "name_cn": "多靶向粪便FIT-DNA",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "结直肠癌优先筛查项目"
       }
@@ -478,6 +661,9 @@
     {
       "name_cn": "结肠镜检查",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "结直肠肿瘤金标准诊断"
       }
@@ -485,6 +671,9 @@
     {
       "name_cn": "HBV-DNA定量",
       "unit": "IU/mL",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "乙型肝炎病毒载量评估"
       }
@@ -492,6 +681,9 @@
     {
       "name_cn": "HCV-RNA定量",
       "unit": "IU/mL",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "丙型肝炎病毒载量评估"
       }
@@ -499,6 +691,9 @@
     {
       "name_cn": "肝脏B超",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "肝脏结构与脂肪肝筛查"
       }
@@ -507,6 +702,9 @@
       "name_cn": "肝脏瞬时弹性成像",
       "name_en": "FibroScan",
       "unit": "kPa",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "肝纤维化程度评估"
       }
@@ -515,6 +713,9 @@
       "name_cn": "血清细胞角蛋白18",
       "name_en": "CK18",
       "unit": "ng/mL",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "肝细胞凋亡相关标志物"
       }
@@ -522,6 +723,9 @@
     {
       "name_cn": "肝脏CT",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "肝脏结构性病变评估"
       }
@@ -529,6 +733,9 @@
     {
       "name_cn": "肝脏MRI",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "肝脏脂肪与纤维化进一步评估"
       }
@@ -537,6 +744,9 @@
       "name_cn": "身高",
       "name_en": "Height",
       "unit": "cm",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "体格测量"
       }
@@ -545,6 +755,9 @@
       "name_cn": "体重",
       "name_en": "Weight",
       "unit": "kg",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "体格测量"
       }
@@ -553,6 +766,9 @@
       "name_cn": "腰围",
       "name_en": "Waist Circumference",
       "unit": "cm",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "中心性肥胖评估"
       }
@@ -561,6 +777,9 @@
       "name_cn": "体质指数",
       "name_en": "BMI",
       "unit": "kg/m^2",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "肥胖分级与代谢风险"
       }
@@ -569,6 +788,9 @@
       "name_cn": "胰岛素(空腹)",
       "name_en": "Insulin Fasting",
       "unit": "uIU/mL",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "胰岛功能评估"
       }
@@ -577,6 +799,9 @@
       "name_cn": "胰岛素(餐后2h)",
       "name_en": "Insulin 2h",
       "unit": "uIU/mL",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric",
       "detail": {
         "clinical_significance": "胰岛反应评估"
       }
@@ -584,6 +809,9 @@
     {
       "name_cn": "内脏脂肪检测",
       "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text",
       "detail": {
         "clinical_significance": "肥胖与代谢风险评估"
       }

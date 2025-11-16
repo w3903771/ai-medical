@@ -1,7 +1,8 @@
 from typing import Optional
 from datetime import datetime, date
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from .base import IDMixin, TimestampMixin, SoftDeleteMixin
+from .user_indicator import UserIndicator
 
 # 用户模型：包含用户名、密码哈希、邮箱、角色与最近登录时间
 
