@@ -58,7 +58,7 @@ async def list_indicators(
         q = q.where((Indicator.name_cn.contains(keyword)) | (Indicator.name_en.contains(keyword)))
     if category:
         cat_res = await session.exec(select(Category).where(Category.name == category))
-        cat = cat_res.scalar_one_or_none()
+        cat = cat_res.one_or_none()
         if cat:
             link_q = select(IndicatorCategoryLink.indicator_id).where(IndicatorCategoryLink.category_id == cat.id)
             q = q.where(Indicator.id.in_(link_q))
@@ -88,7 +88,7 @@ async def list_indicators(
             rec_q = rec_q.order_by(IndicatorRecord.measured_at.desc())
         rec_q = rec_q.limit(1)
         rec_res = await session.exec(rec_q)
-        rec = rec_res.scalar_one_or_none()
+        rec = rec_res.one_or_none()
         value = rec.value if rec else None
         unit = rec.unit if rec else it.unit
         measure_date = rec.measured_at.isoformat() if rec else None
@@ -107,7 +107,7 @@ async def list_indicators(
                 UserIndicator.indicator_id == it.id,
             )
         )
-        fav = fav_res.scalar_one_or_none()
+        fav = fav_res.one_or_none()
         cats_res = await session.exec(
             select(Category)
             .join(IndicatorCategoryLink, IndicatorCategoryLink.category_id == Category.id)
@@ -164,7 +164,7 @@ async def create_indicator(
     if data.categories:
         for name in data.categories:
             c_res = await session.exec(select(Category).where(Category.name == name))
-            c = c_res.scalar_one_or_none()
+            c = c_res.one_or_none()
             if c:
                 session.add(IndicatorCategoryLink(indicator_id=it.id, category_id=c.id))
     await session.commit()
@@ -178,7 +178,7 @@ async def get_indicator(
     current_user: User = Depends(get_current_user),
 ):
     res = await session.exec(select(Indicator).where(Indicator.id == id, Indicator.deleted_at.is_(None)))
-    it = res.scalar_one_or_none()
+    it = res.one_or_none()
     if not it:
         raise HTTPException(status_code=404, detail="指标不存在")
     cats_res = await session.exec(
@@ -209,7 +209,7 @@ async def update_indicator(
     current_user: User = Depends(get_current_user),
 ):
     res = await session.exec(select(Indicator).where(Indicator.id == id, Indicator.deleted_at.is_(None)))
-    it = res.scalar_one_or_none()
+    it = res.one_or_none()
     if not it:
         raise HTTPException(status_code=404, detail="指标不存在")
     it.name_cn = data.nameCn or it.name_cn
@@ -228,7 +228,7 @@ async def update_indicator(
         if data.categories:
             for name in data.categories:
                 c_res = await session.exec(select(Category).where(Category.name == name))
-                c = c_res.scalar_one_or_none()
+                c = c_res.one_or_none()
                 if c:
                     session.add(IndicatorCategoryLink(indicator_id=it.id, category_id=c.id))
     await session.commit()
@@ -242,7 +242,7 @@ async def delete_indicator(
     current_user: User = Depends(get_current_user),
 ):
     res = await session.exec(select(Indicator).where(Indicator.id == id, Indicator.deleted_at.is_(None)))
-    it = res.scalar_one_or_none()
+    it = res.one_or_none()
     if not it:
         raise HTTPException(status_code=404, detail="指标不存在")
     it.deleted_at = datetime.now()
@@ -333,7 +333,7 @@ async def create_record(
     current_user: User = Depends(get_current_user),
 ):
     it_res = await session.exec(select(Indicator).where(Indicator.id == id, Indicator.deleted_at.is_(None)))
-    it = it_res.scalar_one_or_none()
+    it = it_res.one_or_none()
     if not it:
         raise HTTPException(status_code=404, detail="指标不存在")
     r = IndicatorRecord(
@@ -370,7 +370,7 @@ async def update_record(
             IndicatorRecord.deleted_at.is_(None),
         )
     )
-    r = res.scalar_one_or_none()
+    r = res.one_or_none()
     if not r:
         raise HTTPException(status_code=404, detail="记录不存在")
     if data.date is not None:
@@ -409,7 +409,7 @@ async def delete_record(
             IndicatorRecord.deleted_at.is_(None),
         )
     )
-    r = res.scalar_one_or_none()
+    r = res.one_or_none()
     if not r:
         raise HTTPException(status_code=404, detail="记录不存在")
     r.deleted_at = datetime.now()
@@ -440,11 +440,11 @@ async def get_indicator_detail(
     current_user: User = Depends(get_current_user),
 ):
     res = await session.exec(select(Indicator).where(Indicator.id == id))
-    it = res.scalar_one_or_none()
+    it = res.one_or_none()
     if not it:
         raise HTTPException(status_code=404, detail="指标不存在")
     d_res = await session.exec(select(IndicatorDetail).where(IndicatorDetail.indicator_id == id, IndicatorDetail.deleted_at.is_(None)))
-    d = d_res.scalar_one_or_none()
+    d = d_res.one_or_none()
     if not d:
         return {}
     return {
@@ -473,11 +473,11 @@ async def update_indicator_detail(
     if current_user.role not in {"admin", "developer"}:
         raise HTTPException(status_code=403, detail="无权限")
     it_res = await session.exec(select(Indicator).where(Indicator.id == id))
-    it = it_res.scalar_one_or_none()
+    it = it_res.one_or_none()
     if not it:
         raise HTTPException(status_code=404, detail="指标不存在")
     d_res = await session.exec(select(IndicatorDetail).where(IndicatorDetail.indicator_id == id))
-    d = d_res.scalar_one_or_none()
+    d = d_res.one_or_none()
     if d:
         if data.introductionText is not None:
             d.introduction_text = data.introductionText

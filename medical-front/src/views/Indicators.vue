@@ -385,10 +385,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { Search, Plus, Edit, Delete, Setting } from '@element-plus/icons-vue'
+import { getIndicators, createIndicator, deleteIndicator, createRecord } from '@/api/indicators'
+import { listCategories } from '@/api/categories'
 
 // 路由
 const router = useRouter()
@@ -409,13 +411,7 @@ const contextMenuTop = ref(0)
 const categoryFilter = ref('')
 
 // 分类管理相关
-const indicatorCategoriesList = ref([
-  { id: 1, name: '血常规' },
-  { id: 2, name: '肝功能' },
-  { id: 3, name: '肾功能' },
-  { id: 4, name: '血脂' },
-  { id: 5, name: '电解质' }
-])
+const indicatorCategoriesList = ref([])
 const indicatorCategoryDialogVisible = ref(false)
 const indicatorNewCategoryName = ref('')
 const indicatorEditingCategoryId = ref(null)
@@ -457,38 +453,18 @@ const indicatorDialogVisible = ref(false)
 const loading = ref(false)
 
 // 指标分类数据
-const indicatorCategoryOptions = ref([
-  { id: 1, name: '血常规' },
-  { id: 2, name: '肝功能' },
-  { id: 3, name: '肾功能' },
-  { id: 4, name: '血脂' },
-  { id: 5, name: '血糖' }
-])
+const indicatorCategoryOptions = ref([])
 
 // 分类管理对话框
 const indicatorDialogCategory = ref(false)
 const indicatorInputCategoryName = ref('')
 const indicatorEditCategoryId = ref(null)
 
-// 模拟数据
-const mockData = [
-  { id: 1, indicator: '血红蛋白', value: '150', unit: 'g/L', referenceRange: '130-175', date: '2023-05-01', source: '体检', status: 'normal', notes: '', category: 1 },
-  { id: 2, indicator: '血小板', value: '200', unit: '10^9/L', referenceRange: '125-350', date: '2023-05-01', source: '体检', status: 'normal', notes: '', category: 1 },
-  { id: 3, indicator: '白细胞', value: '6.5', unit: '10^9/L', referenceRange: '3.5-9.5', date: '2023-05-01', source: '体检', status: 'normal', notes: '', category: 1 },
-  { id: 4, indicator: '红细胞', value: '5.0', unit: '10^12/L', referenceRange: '4.3-5.8', date: '2023-05-01', source: '体检', status: 'normal', notes: '', category: 1 },
-  { id: 5, indicator: '谷丙转氨酶', value: '45', unit: 'U/L', referenceRange: '9-50', date: '2023-05-01', source: '体检', status: 'normal', notes: '', category: 2 },
-  { id: 6, indicator: '谷草转氨酶', value: '40', unit: 'U/L', referenceRange: '15-40', date: '2023-05-01', source: '体检', status: 'normal', notes: '', category: 2 },
-  { id: 7, indicator: '总胆红素', value: '15', unit: 'μmol/L', referenceRange: '5.1-17.0', date: '2023-05-01', source: '体检', status: 'normal', notes: '', category: 2 },
-  { id: 8, indicator: '血糖', value: '6.1', unit: 'mmol/L', referenceRange: '3.9-6.1', date: '2023-05-01', source: '体检', status: 'normal', notes: '', category: 5 },
-  { id: 9, indicator: '总胆固醇', value: '5.5', unit: 'mmol/L', referenceRange: '3.1-5.7', date: '2023-05-01', source: '体检', status: 'normal', notes: '', category: 4 },
-  { id: 10, indicator: '甘油三酯', value: '1.8', unit: 'mmol/L', referenceRange: '0.56-1.7', date: '2023-05-01', source: '体检', status: 'high', notes: '', category: 4 }
-]
-
+// 接口数据
 const currentContextRow = ref(null)
-// 指标名称选项（内置 + 从现有数据聚合去重）
-const indicatorNameOptions = ref([
-  ...new Set(['体重','血压','血糖','心率','体温','血氧', ...mockData.map(m => m.indicator)])
-])
+
+// 指标名称选项（从接口列表聚合）
+const indicatorNameOptions = ref([])
 
 // 表单数据
 const form = reactive({
@@ -517,53 +493,7 @@ const formRules = {
   category: [{ required: true, message: '请选择分类', trigger: 'change' }]
 }
 
-// 模拟数据
-const tableData = ref([
-  {
-    id: 1,
-    indicator: '体重',
-    value: '68.5',
-    unit: 'kg',
-    referenceRange: '60-75',
-    status: 'normal',
-    measureDate: '2024-01-15',
-    source: '手动录入',
-    note: '早晨空腹测量'
-  },
-  {
-    id: 2,
-    indicator: '血压',
-    value: '145/95',
-    unit: 'mmHg',
-    referenceRange: '90-140/60-90',
-    status: 'high',
-    measureDate: '2024-01-15',
-    source: '设备同步',
-    note: '运动后测量，可能偏高'
-  },
-  {
-    id: 3,
-    indicator: '血糖',
-    value: '8.2',
-    unit: 'mmol/L',
-    referenceRange: '3.9-6.1',
-    status: 'high',
-    measureDate: '2024-01-14',
-    source: '医院检查',
-    note: '餐后2小时'
-  },
-  {
-    id: 4,
-    indicator: '心率',
-    value: '72',
-    unit: 'bpm',
-    referenceRange: '60-100',
-    status: 'normal',
-    measureDate: '2024-01-14',
-    source: '设备同步',
-    note: '静息心率'
-  }
-])
+const tableData = ref([])
 
 // 计算属性
 const hasSelection = computed(() => selectedRows.value.length > 0)
@@ -618,21 +548,15 @@ const handleEdit = (row) => {
 
 const handleDelete = async (row) => {
   try {
-    await ElMessageBox.confirm('确定要删除这条记录吗？', '提示', {
+    await ElMessageBox.confirm('确定要删除该指标吗？', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning'
     })
-    
-    // 这里应该调用删除API
-    const index = tableData.value.findIndex(item => item.id === row.id)
-    if (index > -1) {
-      tableData.value.splice(index, 1)
-      ElMessage.success('删除成功')
-    }
-  } catch {
-    // 用户取消删除
-  }
+    await deleteIndicator(row.id)
+    ElMessage.success('删除成功')
+    loadData()
+  } catch {}
 }
 
 const handleSelectionChange = (selection) => {
@@ -648,24 +572,22 @@ const handleImport = () => {
   ElMessage.info('导入功能开发中...')
 }
 
-const handleDateRangeChange = (dates) => {
-  console.log('日期范围变化:', dates)
-  // 这里应该重新加载数据
+const handleDateRangeChange = () => {
+  loadData()
 }
 
 const handleSearch = () => {
-  console.log('搜索关键词:', searchKeyword.value)
-  // 这里应该重新加载数据
+  loadData()
 }
 
 const handleSizeChange = (size) => {
   pageSize.value = size
-  // 重新加载数据
+  loadData()
 }
 
 const handleCurrentChange = (page) => {
   currentPage.value = page
-  // 重新加载数据
+  loadData()
 }
 
 const handleRowContextMenu = (row, column, event) => {
@@ -736,46 +658,32 @@ const handleAddIndicator = () => {
 
 // 处理分类筛选变化
 const handleCategoryFilterChange = () => {
-  // 这里应该触发数据筛选
   loadData()
 }
 
 // 加载数据
-const loadData = () => {
+const loadData = async () => {
   loading.value = true
-  
-  // 模拟API调用
-  setTimeout(() => {
-    // 这里应该是从API获取数据
-    // 模拟数据筛选
-    let filteredData = [...mockData]
-    
-    // 按关键词筛选
-    if (searchKeyword.value) {
-      filteredData = filteredData.filter(item => 
-        item.indicator.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-        item.value.toString().includes(searchKeyword.value)
-      )
-    }
-    
-    // 按日期筛选
-    if (dateRange.value && dateRange.value.length === 2) {
-      const startDate = new Date(dateRange.value[0])
-      const endDate = new Date(dateRange.value[1])
-      filteredData = filteredData.filter(item => {
-        const itemDate = new Date(item.date)
-        return itemDate >= startDate && itemDate <= endDate
-      })
-    }
-    
-    // 按分类筛选
-    if (categoryFilter.value) {
-      filteredData = filteredData.filter(item => item.category === categoryFilter.value)
-    }
-    
-    tableData.value = filteredData
+  const params = {
+    page: currentPage.value,
+    pageSize: pageSize.value,
+    keyword: searchKeyword.value || undefined,
+    startDate: dateRange.value?.[0] || undefined,
+    endDate: dateRange.value?.[1] || undefined,
+  }
+  if (categoryFilter.value) {
+    const cat = indicatorCategoriesList.value.find(c => c.id === categoryFilter.value)
+    if (cat) params.category = cat.name
+  }
+  try {
+    const res = await getIndicators(params)
+    tableData.value = Array.isArray(res?.items) ? res.items : []
+    total.value = Number(res?.total || 0)
+    const names = [...new Set(tableData.value.map(i => i.indicator || i.nameCn).filter(Boolean))]
+    indicatorNameOptions.value = names
+  } finally {
     loading.value = false
-  }, 500)
+  }
 }
 
 const handleView = (row) => {
@@ -808,59 +716,26 @@ const handleViewTrend = (row) => {
 const handleSubmit = async () => {
   try {
     await formRef.value.validate()
-    
-    // 将最小值和最大值合并为参考范围字符串，用于显示
-    if (form.referenceMin && form.referenceMax) {
-      form.referenceRange = `${form.referenceMin}-${form.referenceMax}`
-    } else if (form.referenceMin) {
-      form.referenceRange = `>${form.referenceMin}`
-    } else if (form.referenceMax) {
-      form.referenceRange = `<${form.referenceMax}`
-    } else {
-      form.referenceRange = ''
+    const name = form.indicator
+    const target = tableData.value.find(i => (i.indicator || i.nameCn) === name)
+    if (!target) {
+      ElMessage.warning('请先在“新增指标”中创建该指标，或选择已存在的指标')
+      return
     }
-    
-    // 判断数值是否在参考范围内，设置状态
-    if (form.value && form.referenceMin && form.referenceMax) {
-      const value = parseFloat(form.value)
-      const min = parseFloat(form.referenceMin)
-      const max = parseFloat(form.referenceMax)
-      
-      if (value < min) {
-        form.status = 'low'
-      } else if (value > max) {
-        form.status = 'high'
-      } else {
-        form.status = 'normal'
-      }
-    } else {
-      form.status = 'normal'
+    const payload = {
+      date: form.measureDate,
+      value: String(form.value),
+      unit: form.unit,
+      referenceMin: form.referenceMin ? Number(form.referenceMin) : undefined,
+      referenceMax: form.referenceMax ? Number(form.referenceMax) : undefined,
+      source: form.source || 'manual',
+      note: form.note || ''
     }
-    
-    // 这里应该调用API保存数据
-    // 模拟API调用成功
-    if (form.id) {
-      // 编辑现有数据
-      const index = tableData.value.findIndex(item => item.id === form.id)
-      if (index > -1) {
-        tableData.value[index] = { ...form }
-        ElMessage.success('编辑成功')
-      }
-    } else {
-      // 添加新数据
-      const newData = {
-        ...form,
-        id: Date.now() // 使用时间戳作为临时ID
-      }
-      tableData.value.unshift(newData)
-      ElMessage.success('添加成功')
-    }
-    
-    // 关闭对话框
+    await createRecord(target.id, payload)
+    ElMessage.success('添加成功')
     dialogVisible.value = false
-  } catch (error) {
-    console.error('表单验证失败:', error)
-  }
+    loadData()
+  } catch {}
 }
 
 const resetForm = () => {
@@ -888,28 +763,9 @@ const openCategoryDialog = () => {
   indicatorCategoryDialogVisible.value = true
 }
 
-// 添加新分类
+// 添加新分类（后端暂不支持，提示只读）
 const addCategory = () => {
-  if (!indicatorNewCategoryName.value.trim()) {
-    ElMessage.warning('分类名称不能为空')
-    return
-  }
-  
-  // 检查是否已存在相同名称的分类
-  if (indicatorCategoryOptions.value.some(c => c.name === indicatorNewCategoryName.value.trim())) {
-    ElMessage.warning('已存在相同名称的分类')
-    return
-  }
-  
-  // 生成新ID并添加分类
-  const newId = Date.now().toString()
-  indicatorCategoryOptions.value.push({
-    id: newId,
-    name: indicatorNewCategoryName.value.trim()
-  })
-  
-  indicatorNewCategoryName.value = ''
-  ElMessage.success('添加分类成功')
+  ElMessage.warning('分类由后端维护，当前不可在前端新增')
 }
 
 // 编辑分类
@@ -918,61 +774,35 @@ const editCategory = (category) => {
   indicatorEditingCategoryId.value = category.id
 }
 
-// 保存编辑的分类
+// 保存编辑的分类（后端暂不支持，提示只读）
 const saveCategory = () => {
-  if (!indicatorNewCategoryName.value.trim()) {
-    ElMessage.warning('分类名称不能为空')
-    return
-  }
-  
-  // 检查是否已存在相同名称的分类（排除当前编辑的分类）
-  if (indicatorCategoryOptions.value.some(c => c.name === indicatorNewCategoryName.value.trim() && c.id !== indicatorEditingCategoryId.value)) {
-    ElMessage.warning('已存在相同名称的分类')
-    return
-  }
-  
-  const index = indicatorCategoryOptions.value.findIndex(c => c.id === indicatorEditingCategoryId.value)
-  if (index > -1) {
-    indicatorCategoryOptions.value[index].name = indicatorNewCategoryName.value.trim()
-    indicatorNewCategoryName.value = ''
-    indicatorEditingCategoryId.value = null
-    ElMessage.success('编辑分类成功')
-  }
+  ElMessage.warning('分类由后端维护，当前不可在前端编辑')
 }
 
-// 删除分类
-const deleteCategory = (category) => {
-  ElMessageBox.confirm(`确定要删除分类"${category.name}"吗？`, '提示', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning'
-  }).then(() => {
-    const index = indicatorCategoryOptions.value.findIndex(c => c.id === category.id)
-    if (index > -1) {
-      indicatorCategoryOptions.value.splice(index, 1)
-      ElMessage.success('删除分类成功')
-    }
-  }).catch(() => {})
+// 删除分类（后端暂不支持，提示只读）
+const deleteCategory = () => {
+  ElMessage.warning('分类由后端维护，当前不可在前端删除')
 }
 
 // 提交新增指标表单
 const handleSubmitIndicator = async () => {
   try {
     await indicatorFormRef.value.validate()
-    
-    // 这里应该调用API保存新指标
-    // 模拟API调用成功
-    const categoryName = indicatorCategoryOptions.value.find(c => c.id === indicatorForm.category)?.name || ''
-    ElMessage.success(`成功添加指标: ${indicatorForm.name}${categoryName ? ' ('+categoryName+')' : ''}`)
-    
-    // 关闭对话框
+    const categoryName = indicatorCategoryOptions.value.find(c => c.id === indicatorForm.category)?.name
+    const payload = {
+      nameCn: indicatorForm.name,
+      nameEn: indicatorForm.nameEn || undefined,
+      type: 'numeric',
+      unit: indicatorForm.unit,
+      referenceMin: indicatorForm.referenceMin ? Number(indicatorForm.referenceMin) : undefined,
+      referenceMax: indicatorForm.referenceMax ? Number(indicatorForm.referenceMax) : undefined,
+      categories: categoryName ? [categoryName] : undefined,
+    }
+    await createIndicator(payload)
+    ElMessage.success('成功添加指标')
     indicatorDialogVisible.value = false
-    
-    // 刷新指标列表
-    // 这里应该重新加载指标数据
-  } catch (error) {
-    console.error('表单验证失败', error)
-  }
+    loadData()
+  } catch {}
 }
 
 // 重置新增指标表单
@@ -997,9 +827,13 @@ const handleDocumentClick = () => {
   }
 }
 
-onMounted(() => {
-  total.value = tableData.value.length
+onMounted(async () => {
   document.addEventListener('click', handleDocumentClick)
+  const cats = await listCategories({ page: 1, pageSize: 100 })
+  const items = Array.isArray(cats?.items) ? cats.items : []
+  indicatorCategoryOptions.value = items
+  indicatorCategoriesList.value = items
+  await loadData()
 })
 </script>
 

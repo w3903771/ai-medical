@@ -815,6 +815,279 @@
       "detail": {
         "clinical_significance": "肥胖与代谢风险评估"
       }
+    },
+    {
+      "name_cn": "嗜酸细胞百分比",
+      "unit": "%",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "白细胞",
+      "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "单核细胞百分比",
+      "unit": "%",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "谷丙转氨酶",
+      "unit": "U/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "谷草转氨酶",
+      "unit": "U/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "有核红细胞百分比",
+      "unit": "%",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "平均血红蛋白含量",
+      "unit": "pg",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "平均红细胞体积",
+      "unit": "fL",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "钾",
+      "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "大血小板数目",
+      "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "平均血红蛋白浓度",
+      "unit": "g/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "中性粒细胞百分比",
+      "unit": "%",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "血小板",
+      "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "二氧化碳",
+      "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "红细胞分布宽度-SD",
+      "unit": "fL",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "红细胞分布宽度-CV",
+      "unit": "%",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "淋巴细胞百分比",
+      "unit": "%",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "血小板分布宽度",
+      "unit": "fL",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "血小板比积",
+      "unit": "%",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "中性粒细胞绝对值",
+      "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "肾小球滤过率",
+      "unit": "mL/min/1.73m^2",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "嗜碱细胞百分比",
+      "unit": "%",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "嗜碱细胞绝对值",
+      "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "淋巴细胞绝对值",
+      "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "白球比",
+      "unit": "ratio",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "血尿素氮",
+      "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "红细胞压积",
+      "unit": "%",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "嗜酸细胞绝对值",
+      "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "钠",
+      "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "血清膀抑素C",
+      "unit": "mg/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "红细胞",
+      "unit": "10^12/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "胆碱酯酶",
+      "unit": "U/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "血小板平均体积",
+      "unit": "fL",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "总胆汁酸",
+      "unit": "umol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "白细胞分类计数",
+      "unit": "N/A",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "text"
+    },
+    {
+      "name_cn": "氯",
+      "unit": "mmol/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "内生肌酐清除率",
+      "unit": "mL/min",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "单核细胞绝对值",
+      "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
+    },
+    {
+      "name_cn": "有核红细胞绝对值",
+      "unit": "10^9/L",
+      "owner_user_id": null,
+      "is_builtin": true,
+      "type": "numeric"
     }
   ]
 }
